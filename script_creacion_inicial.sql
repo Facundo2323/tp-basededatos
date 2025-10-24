@@ -87,6 +87,14 @@ CREATE TABLE KEY_GROUP.Curso (
     FOREIGN KEY (id_profesor) REFERENCES KEY_GROUP.Profesor(id_profesor)
 );
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Encuesta' AND schema_id = SCHEMA_ID('KEY_GROUP'))
+CREATE TABLE KEY_GROUP.Encuesta (
+    id_encuesta BIGINT IDENTITY(1,1) PRIMARY KEY,
+    FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso),
+    fecha_registro DATETIME2(6),
+    observaciones NVARCHAR(255)
+);
+
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Pregunta' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Pregunta (
     id_pregunta BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -95,20 +103,12 @@ CREATE TABLE KEY_GROUP.Pregunta (
     FOREIGN KEY (id_encuesta) REFERENCES KEY_GROUP.Encuesta(id_encuesta)
 );
 
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Pregunta' AND schema_id = SCHEMA_ID('KEY_GROUP'))
-CREATE TABLE KEY_GROUP.Encuesta (
-    id_pregunta BIGINT IDENTITY(1,1) PRIMARY KEY,
-    pregunta NVARCHAR(255),
-    respuesta BIGINT, -- nota1, nota2, nota3, nota4
-    FOREIGN KEY (id_encuesta) REFERENCES KEY_GROUP.Encuesta(id_encuesta)
-);
 
 
--- CATEGORIA
--- TURNO
--- CURSO
--- PREGUNTA
--- ENCUESTA
+
+
+
+
 -- DETALLE_FACTURA
 -- ALUMNO
 -- FACTURA
