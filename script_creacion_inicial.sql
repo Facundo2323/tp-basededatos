@@ -99,7 +99,7 @@ CREATE TABLE KEY_GROUP.Curso (
     CONSTRAINT PK_Curso_codigo PRIMARY KEY (codigo_curso),
     CONSTRAINT FK_Curso_categoria FOREIGN KEY (id_categoria) REFERENCES KEY_GROUP.Categoria(id_categoria),
     CONSTRAINT FK_Curso_sede FOREIGN KEY (id_sede) REFERENCES KEY_GROUP.Sede(id_sede),
-    CONSTRAINT FK_Curso_tipo_turno FOREIGN KEY (tipo_turno) REFERENCES KEY_GROUP.Turno(tipo_turno),
+    CONSTRAINT FK_Curso_turno FOREIGN KEY (tipo_turno) REFERENCES KEY_GROUP.Turno(tipo_turno),
     CONSTRAINT FK_Curso_profesor FOREIGN KEY (id_profesor) REFERENCES KEY_GROUP.Profesor(id_profesor)
 );
 
@@ -111,7 +111,7 @@ CREATE TABLE KEY_GROUP.Encuesta (
     observaciones NVARCHAR(255),
 
     CONSTRAINT PK_Encuesta_id PRIMARY KEY (id_encuesta)
-    CONSTRAINT FK_Encuesta_codigo_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso)
+    CONSTRAINT FK_Encuesta_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso)
 );
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Pregunta' AND schema_id = SCHEMA_ID('KEY_GROUP'))
@@ -119,6 +119,7 @@ CREATE TABLE KEY_GROUP.Pregunta (
     id_pregunta BIGINT IDENTITY(1,1),
     pregunta NVARCHAR(255),
     respuesta INT, -- nota(1 al 10)
+    id_encuesta BIGINT,
 
     CONSTRAINT PK_Pregunta_id PRIMARY KEY (id_pregunta),
     CONSTRAINT FK_Pregunta_encuesta FOREIGN KEY (id_encuesta) REFERENCES KEY_GROUP.Encuesta(id_encuesta)
@@ -132,7 +133,7 @@ CREATE TABLE KEY_GROUP.Detalle_Factura (
     importe DECIMAL(18,2),
 
     CONSTRAINT PK_Detalle_Factura_id PRIMARY KEY (id_detalle_factura),
-    CONSTRAINT FK_Inscripcion_codigo_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso)
+    CONSTRAINT FK_Detalle_Factura_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso)
 )
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Alumno' AND schema_id = SCHEMA_ID('KEY_GROUP'))
@@ -313,3 +314,36 @@ CREATE TABLE KEY_GROUP.Evaluacion_Final (
     CONSTRAINT FK_Evaluacion_Final_profesor FOREIGN KEY (id_profesor) REFERENCES KEY_GROUP.Profesor(id_profesor),
     CONSTRAINT FK_Evaluacion_Final_alumno FOREIGN KEY (legajo_alumno) REFERENCES KEY_GROUP.Alumno(legajo_alumno)
 )
+
+CREATE NONCLUSTERED INDEX IX_Localidad_provincia ON Localidad(id_provincia);
+CREATE NONCLUSTERED INDEX IX_Profesor_localidad ON Profesor(id_localidad);
+CREATE NONCLUSTERED INDEX IX_Sede_institucion ON Sede(id_institucion);
+CREATE NONCLUSTERED INDEX IX_Sede_localidad ON Sede(id_localidad);
+CREATE NONCLUSTERED INDEX IX_Curso_categoria ON Curso(id_categoria);
+CREATE NONCLUSTERED INDEX IX_Curso_sede ON Curso(id_sede);
+CREATE NONCLUSTERED INDEX IX_Curso_turno ON Curso(tipo_turno);
+CREATE NONCLUSTERED INDEX IX_Curso_profesor ON Curso(id_profesor);
+CREATE NONCLUSTERED INDEX IX_Encuesta_curso ON Encuesta(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Pregunta_encuesta ON Pregunta(id_encuesta);
+CREATE NONCLUSTERED INDEX IX_Detalle_Factura_curso ON Detalle_Factura(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Alumno_localidad ON Alumno(id_localidad);
+CREATE UNIQUE NONCLUSTERED INDEX IX_Factura_detalle ON Factura(id_detalle_factura);
+CREATE NONCLUSTERED INDEX IX_Factura_alumno ON Factura(legajo_alumno);
+CREATE UNIQUE NONCLUSTERED INDEX IX_Pago_factura ON Pago(id_factura);
+CREATE NONCLUSTERED INDEX IX_Pago_medio_pago ON Pago(codigo_medio_de_pago);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_curso ON Inscripcion(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_alumno ON Inscripcion(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_estado ON Inscripcion(codigo_estado_inscripcion);
+CREATE NONCLUSTERED INDEX IX_Modulo_Curso_curso ON Modulo_por_Curso(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Modulo_Curso_modulo ON Modulo_por_Curso(id_modulo);
+CREATE NONCLUSTERED INDEX IX_Trabajo_Practico_curso ON Trabajo_Practico(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Trabajo_Practico_alumno ON Trabajo_Practico(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_curso ON Evaluacion(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_modulo ON Evaluacion(id_modulo);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_alumno ON Evaluacion(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Final_curso ON Final(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_Final_alumno ON Inscripcion_Final(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_Final_final ON Inscripcion_Final(id_final);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_final ON Evaluacion_Final(id_final);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_profesor ON Evaluacion_Final(id_profesor);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_alumno ON Evaluacion_Final(legajo_alumno);
