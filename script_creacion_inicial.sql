@@ -27,15 +27,15 @@ CREATE TABLE KEY_GROUP.Localidad (
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Profesor' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Profesor (
-    id_profesor INT IDENTITY(1,1),
-    dni NVARCHAR(255),
-    id_localidad INT,
-    nombre NVARCHAR(255),
-    apellido NVARCHAR(255),
-    fecha_nacimiento DATETIME2(6),
-    mail NVARCHAR(255),
-    direccion NVARCHAR(255),
-    telefono NVARCHAR(255),
+    Id_profesor INT IDENTITY(1,1),
+    Dni NVARCHAR(255),
+    Id_localidad INT,
+    Nombre NVARCHAR(255),
+    Apellido NVARCHAR(255),
+    Fecha_nacimiento DATETIME2(6),
+    Mail NVARCHAR(255),
+    Direccion NVARCHAR(255),
+    Telefono NVARCHAR(255),
 
     CONSTRAINT PK_Profesor_id PRIMARY KEY (id_profesor),
     CONSTRAINT FK_Profesor_localidad FOREIGN KEY (id_localidad) REFERENCES KEY_GROUP.Localidad(id_localidad),
@@ -313,3 +313,71 @@ CREATE TABLE KEY_GROUP.Evaluacion_Final (
     CONSTRAINT FK_Evaluacion_Final_profesor FOREIGN KEY (id_profesor) REFERENCES KEY_GROUP.Profesor(id_profesor),
     CONSTRAINT FK_Evaluacion_Final_alumno FOREIGN KEY (legajo_alumno) REFERENCES KEY_GROUP.Alumno(legajo_alumno)
 )
+
+-- Migracion de datos --> Stored procedures
+
+CREATE PROCEDURE KEY_GROUP.migrar_Provincia
+AS  
+    BEGIN
+
+
+    INSERT INTO KEY_GROUP.Provincia (Nombre)
+
+        SELECT DISTINCT Sede_Provincia AS Nombre FROM gd_esquema.Maestra WHERE Sede_Provincia IS NOT NULL
+        UNION
+        SELECT DISTINCT Alumno_Provincia AS Nombre FROM gd_esquema.Maestra WHERE Alumno_Provincia IS NOT NULL
+        UNION
+        SELECT DISTINCT Profesor_Provincia AS Nombre FROM gd_esquema.Maestra WHERE Profesor_Provincia IS NOT NULL
+
+        UPDATE KEY_GROUP.Provincia
+        SET Nombre = REPLACE(Nombre, ';', 'go')
+        WHERE Nombre LIKE '%;%'
+
+    END
+GO  
+
+
+CREATE PROCEDURE KEY_GROUP.migrar_Localidad
+AS 
+    BEGIN
+        -- --primero actualizo localidades mal escritas
+        -- UPDATE gd_esquema.Maestra
+		-- SET Alumno_Localidad = REPLACE(Alumno_Localidad, ';', 'go'),
+        -- Alumno_Provincia = REPLACE(Alumno_Provincia, ';', 'go')
+		-- WHERE Alumno_Localidad LIKE '%;%' AND Alumno_Provincia LIKE '%;%'
+        
+    INSERT INTO KEY_GROUP.Localidad (Nombre, Id_provincia)
+            SELECT DISTINCT Loc.Nombre, P.Id_provincia
+            FROM (
+            
+            SELECT DISTINCT Sede_Provincia AS Nombre, Sede_Localidad AS Provincia_nombre 
+            --por campos invertidos en la maestra
+            FROM gd_esquema.Maestra
+            WHERE Sede_Localidad IS NOT NULL AND Sede_Provincia IS NOT NULL
+
+            UNION
+
+            SELECT DISTINCT Alumno_Localidad AS Nombre, Alumno_Provincia AS Provincia_nombre
+            FROM gd_esquema.Maestra
+            WHERE Alumno_Localidad IS NOT NULL AND Alumno_Provincia IS NOT NULL
+
+            UNION
+
+            SELECT DISTINCT Profesor_Localidad AS Nombre, Profesor_Provincia AS Provincia_nombre
+            FROM gd_esquema.Maestra
+            WHERE Profesor_Localidad IS NOT NULL AND Profesor_Provincia IS NOT NULL
+            ) AS Loc
+            JOIN KEY_GROUP.Provincia P ON Loc.ProvinciaNombre = P.Nombre 
+
+            --actualizo el valor porque la tabla maestra contiene errores.
+            UPDATE KEY_GROUP.Localidad
+            SET Nombre = REPLACE(Nombre, ';', 'go')
+            WHERE Nombre LIKE '%;%'
+    END 
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Profesor
+AS 
+    BEGIN
+        
+    INSERT INTO KEY_GROUP.Profesor (Id_profesor, Dni, Id_localidad, Nombre, Apellido, Fecha_nacimiento, Mail, Direccion, Telefono)
