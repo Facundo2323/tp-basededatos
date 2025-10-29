@@ -9,17 +9,17 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Provincia' AND schema_id = SCHEMA_ID('KEY_GROUP')) 
 CREATE TABLE KEY_GROUP.Provincia (
     --id autoincremental, arranca en uno y salta de a 1
-    id_provincia INT IDENTITY(1,1),
-    nombre NVARCHAR(255),
+    Id_provincia INT IDENTITY(1,1),
+    Nombre NVARCHAR(255),
 
     CONSTRAINT PK_Provincia_id PRIMARY KEY (id_provincia)
 );
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Localidad' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Localidad (
-    id_localidad INT IDENTITY(1,1),
-    nombre NVARCHAR(255),
-    id_provincia INT,
+    Id_localidad INT IDENTITY(1,1),
+    Nombre NVARCHAR(255),
+    Id_provincia INT,
 
     CONSTRAINT PK_Localidad_id PRIMARY KEY (id_localidad),
     CONSTRAINT FK_Localidad_provincia FOREIGN KEY (id_provincia) REFERENCES KEY_GROUP.Provincia(id_provincia)
@@ -43,10 +43,10 @@ CREATE TABLE KEY_GROUP.Profesor (
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Institucion' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Institucion (
-    id_institucion INT IDENTITY(1,1),
-    cuit_institucion NVARCHAR(255),
-    nombre NVARCHAR(255),
-    razon_social NVARCHAR(255),
+    Id_institucion INT IDENTITY(1,1),
+    Cuit NVARCHAR(255),
+    Nombre NVARCHAR(255),
+    Razon_social NVARCHAR(255),
 
     CONSTRAINT PK_Institucion_id PRIMARY KEY (id_institucion)
 );
@@ -381,8 +381,210 @@ CREATE PROCEDURE KEY_GROUP.migrar_Profesor
 AS 
     BEGIN
         
-    INSERT INTO KEY_GROUP.Profesor (Id_profesor, Dni, Id_localidad, Nombre, Apellido, Fecha_nacimiento, Mail, Direccion, Telefono)
+        INSERT INTO KEY_GROUP.Profesor (Dni, Id_localidad, Nombre, Apellido, Fecha_nacimiento, Mail, Direccion, Telefono)
+        SELECT DISTINCT M.Profesor_Dni, Loc.Id_localidad, M.Profesor_Apellido, M.Profesor_Nombre,
+                        M.Profesor_FechaNacimiento, M.Profesor_Mail, M.Profesor_Direccion, M.Profesor_Telefono
+            --nombre y apellido invertidos en la maestra.
+        --el dni del profesor arranca en 55 y no puede ser. Incluirlo en el documento de justificaciones.            
+        FROM gd_esquema.Maestra M
 
+        JOIN KEY_GROUP.Provincia P
+        ON M.Profesor_Provincia = P.Nombre
+        
+        JOIN KEY_GROUP.Localidad Loc
+        ON M.Profesor_Localidad = Loc.Nombre AND Loc.Id_provincia = P.Id_provincia
+
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Institucion
+AS
+    BEGIN
+
+        INSERT INTO KEY_GROUP.Institucion (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT Institucion_Cuit, Institucion_Nombre, Institucion_RazonSocial
+        FROM gd_esquema.Maestra
+        WHERE Institucion_Cuit IS NOT NULL AND Institucion_Nombre IS NOT NULL AND Institucion_RazonSocial IS NOT NULL
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Sede
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Sede (Id_Institucion, Nombre, Direccion, Telefono, Mail, Id_localidad)
+        SELECT DISTINCT I.Id_Institucion, M.Sede_Nombre, M.Sede_Direccion, M.Sede_Telefono, M.Sede_Mail, L.Id_localidad
+        FROM gd_esquema.Maestra M
+        
+        JOIN KEY_GROUP.Institucion I 
+        ON I.Id_Institucion =
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Categoria
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Categoria (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Turno
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Turno (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Curso
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Curso (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Encuesta
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Encuesta (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Pregunta
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Pregunta (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Detalle_factura
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Detalle_factura (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Alumno
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Alumno (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Factura
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Factura (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Medio_de_pago
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Medio_de_pago (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Pago
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Pago (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Estado_inscripcion
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Estado_inscripcion (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Inscripcion
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Inscripcion (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Dia
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Dia (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Curso_por_dia
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Curso_por_dia (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Modulo
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Modulo (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Modulo_por_curso
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Modulo_por_curso (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Trabajo_practico
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Trabajo_practico (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Evaluacion
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Evaluacion (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Final
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Final (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Inscripcion_final
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Inscripcion_final (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Evaluacion_final
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Evaluacion_final (Cuit, Nombre, Razon_social)
+        SELECT DISTINCT 
     END
 GO
 
@@ -420,3 +622,37 @@ CREATE NONCLUSTERED INDEX IX_Inscripcion_Final_final ON Inscripcion_Final(id_fin
 CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_final ON Evaluacion_Final(id_final);
 CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_profesor ON Evaluacion_Final(id_profesor);
 CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_alumno ON Evaluacion_Final(legajo_alumno);
+
+BEGIN TRANSACTION
+ BEGIN TRY
+	EXECUTE KEY_GROUP.migrar_Provincia
+    EXECUTE KEY_GROUP.migrar_Localidad
+    EXECUTE KEY_GROUP.migrar_Profesor
+    EXECUTE KEY_GROUP.migrar_Institucion 
+    EXECUTE KEY_GROUP.migrar_Sede
+    EXECUTE KEY_GROUP.migrar_Categoria
+    EXECUTE KEY_GROUP.migrar_Turno
+    EXECUTE KEY_GROUP.migrar_Curso
+    EXECUTE KEY_GROUP.migrar_Encuesta
+    EXECUTE KEY_GROUP.migrar_Pregunta
+    EXECUTE KEY_GROUP.migrar_Detalle_factura
+    EXECUTE KEY_GROUP.migrar_Alumno
+    EXECUTE KEY_GROUP.migrar_Factura
+    EXECUTE KEY_GROUP.migrar_Medio_de_pago
+    EXECUTE KEY_GROUP.migrar_Pago
+    EXECUTE KEY_GROUP.migrar_Estado_inscripcion
+    EXECUTE KEY_GROUP.migrar_Inscripcion
+    EXECUTE KEY_GROUP.migrar_Dia
+    EXECUTE KEY_GROUP.migrar_Curso_por_dia
+    EXECUTE KEY_GROUP.migrar_Modulo
+    EXECUTE KEY_GROUP.migrar_Modulo_por_curso
+    EXECUTE KEY_GROUP.migrar_Trabajo_practico
+    EXECUTE KEY_GROUP.migrar_Evaluacion
+    EXECUTE KEY_GROUP.migrar_Final
+    EXECUTE KEY_GROUP.migrar_Inscripcion_final
+    EXECUTE KEY_GROUP.migrar_Evaluacion_final
+END TRY
+BEGIN CATCH
+    ROLLBACK TRANSACTION;
+	THROW 50001, 'Ocurrió un error en la transferencia de datos.',1;
+END CATCH
