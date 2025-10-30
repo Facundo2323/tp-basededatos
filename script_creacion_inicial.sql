@@ -53,13 +53,13 @@ CREATE TABLE KEY_GROUP.Institucion (
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Sede' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Sede (
-    id_sede BIGINT IDENTITY(1,1),
-    id_institucion INT,
-    nombre NVARCHAR(255),
-    direccion NVARCHAR(255),
-    telefono NVARCHAR(255)
-    mail NVARCHAR(255),
-    id_localidad INT,
+    Id_sede BIGINT IDENTITY(1,1),
+    Id_institucion INT,
+    Nombre NVARCHAR(255),
+    Direccion NVARCHAR(255),
+    Telefono NVARCHAR(255),
+    Mail NVARCHAR(255),
+    Id_localidad INT,
 
     CONSTRAINT PK_Sede_id PRIMARY KEY (id_sede),
     CONSTRAINT FK_Sede_institucion FOREIGN KEY (id_institucion) REFERENCES KEY_GROUP.Institucion(id_institucion),
@@ -324,7 +324,7 @@ AS
 
     INSERT INTO KEY_GROUP.Provincia (Nombre)
 
-        SELECT DISTINCT Sede_Provincia AS Nombre FROM gd_esquema.Maestra WHERE Sede_Provincia IS NOT NULL
+        SELECT DISTINCT Sede_Localidad AS Nombre FROM gd_esquema.Maestra WHERE Sede_Localidad IS NOT NULL --mal los campos de la maestra
         UNION
         SELECT DISTINCT Alumno_Provincia AS Nombre FROM gd_esquema.Maestra WHERE Alumno_Provincia IS NOT NULL
         UNION
@@ -368,7 +368,7 @@ AS
             FROM gd_esquema.Maestra
             WHERE Profesor_Localidad IS NOT NULL AND Profesor_Provincia IS NOT NULL
             ) AS Loc
-            JOIN KEY_GROUP.Provincia P ON Loc.ProvinciaNombre = P.Nombre 
+            JOIN KEY_GROUP.Provincia P ON Loc.Provincia_nombre = P.Nombre 
 
             --actualizo el valor porque la tabla maestra contiene errores.
             UPDATE KEY_GROUP.Localidad
@@ -392,7 +392,12 @@ AS
         ON M.Profesor_Provincia = P.Nombre
         
         JOIN KEY_GROUP.Localidad Loc
-        ON M.Profesor_Localidad = Loc.Nombre AND Loc.Id_provincia = P.Id_provincia
+        ON M.Profesor_Localidad = Loc.Nombre 
+
+		UPDATE KEY_GROUP.Profesor
+		SET Apellido = REPLACE(Apellido,'DE LAS MERCEDES','De Las Mercedes'),
+		Mail = REPLACE(Mail, 'PobleteDE LAS MERCEDES@gmail.com', 'PobleteDeLasMercedes@gmail.com')
+		WHERE Id_profesor = 1
 
     END
 GO
@@ -416,7 +421,11 @@ AS
         FROM gd_esquema.Maestra M
         
         JOIN KEY_GROUP.Institucion I 
-        ON I.Id_Institucion =
+        ON M.Institucion_Nombre = I.Nombre
+
+        JOIN KEY_GROUP.Localidad L
+        ON M.Sede_Localidad = L.Nombre 
+
     END
 GO
 
