@@ -1,56 +1,55 @@
-USE GD1C2025;
-GO
+DROP TABLE KEY_GROUP.Evaluacion_Final;
+DROP TABLE KEY_GROUP.Inscripcion_Final;
+DROP TABLE KEY_GROUP.Final;
+DROP TABLE KEY_GROUP.Evaluacion;
+DROP TABLE KEY_GROUP.Trabajo_Practico;
+DROP TABLE KEY_GROUP.Modulo_por_Curso;
+DROP TABLE KEY_GROUP.Modulo;
+DROP TABLE KEY_GROUP.Curso_por_Dia;
+DROP TABLE KEY_GROUP.Dia;
+DROP TABLE KEY_GROUP.Inscripcion;
+DROP TABLE KEY_GROUP.Estado_Inscripcion;
+DROP TABLE KEY_GROUP.Pago;
+DROP TABLE KEY_GROUP.Medio_de_Pago;
+DROP TABLE KEY_GROUP.Factura;
+DROP TABLE KEY_GROUP.Alumno;
+DROP TABLE KEY_GROUP.Detalle_Factura;
+DROP TABLE KEY_GROUP.Pregunta;
+DROP TABLE KEY_GROUP.Encuesta;
+DROP TABLE KEY_GROUP.Curso;
+DROP TABLE KEY_GROUP.Turno;
+DROP TABLE KEY_GROUP.Categoria;
+DROP TABLE KEY_GROUP.Sede;
+DROP TABLE KEY_GROUP.Institucion;
+DROP TABLE KEY_GROUP.Profesor;
+DROP TABLE KEY_GROUP.Localidad;
+DROP TABLE KEY_GROUP.Provincia;
 
--- Eliminación de tablas en orden inverso para no romper las FK
+DROP PROCEDURE KEY_GROUP.migrar_Provincia;
+DROP PROCEDURE KEY_GROUP.migrar_Alumno;
+DROP PROCEDURE KEY_GROUP.Correccion_General;
+DROP PROCEDURE KEY_GROUP.migrar_Categoria;
+DROP PROCEDURE KEY_GROUP.migrar_Curso;
+DROP PROCEDURE KEY_GROUP.migrar_Curso_por_dia;
+DROP PROCEDURE KEY_GROUP.migrar_Detalle_factura;
+DROP PROCEDURE KEY_GROUP.migrar_Dia;
+DROP PROCEDURE KEY_GROUP.migrar_Encuesta;
+DROP PROCEDURE KEY_GROUP.migrar_Estado_inscripcion;
+DROP PROCEDURE KEY_GROUP.migrar_EValuacion
+DROP PROCEDURE KEY_GROUP.migrar_Evaluacion_final;
+DROP PROCEDURE KEY_GROUP.migrar_Factura;
+DROP PROCEDURE KEY_GROUP.migrar_Final;
+DROP PROCEDURE KEY_GROUP.migrar_Inscripcion;
+DROP PROCEDURE KEY_GROUP.migrar_Inscripcion_final;
+DROP PROCEDURE KEY_GROUP.migrar_Institucion;
+DROP PROCEDURE KEY_GROUP.migrar_Localidad;
+DROP PROCEDURE KEY_GROUP.migrar_Medio_de_pago;
+DROP PROCEDURE KEY_GROUP.migrar_Modulo;
+DROP PROCEDURE KEY_GROUP.migrar_Pago;
+DROP PROCEDURE KEY_GROUP.migrar_Pregunta;
+DROP PROCEDURE KEY_GROUP.migrar_Profesor;
+DROP PROCEDURE KEY_GROUP.migrar_Sede;
+DROP PROCEDURE KEY_GROUP.migrar_Trabajo_practico;
+DROP PROCEDURE KEY_GROUP.migrar_Turno;
 
-
-IF OBJECT_ID('KEY_GROUP.Curso', 'U') IS NOT NULL
-    DROP TABLE KEY_GROUP.Curso;
-
-IF OBJECT_ID('KEY_GROUP.Turno', 'U') IS NOT NULL
-    DROP TABLE KEY_GROUP.Turno;
-
-IF OBJECT_ID('KEY_GROUP.Categoria', 'U') IS NOT NULL
-    DROP TABLE KEY_GROUP.Categoria;
-
-IF OBJECT_ID('KEY_GROUP.Sede', 'U') IS NOT NULL
-    DROP TABLE KEY_GROUP.Sede;
-
-IF OBJECT_ID('KEY_GROUP.Institucion', 'U') IS NOT NULL
-    DROP TABLE KEY_GROUP.Institucion;
-
-IF OBJECT_ID('KEY_GROUP.Profesor', 'U') IS NOT NULL
-    DROP TABLE KEY_GROUP.Profesor;
-
-IF OBJECT_ID('KEY_GROUP.Localidad', 'U') IS NOT NULL
-    DROP TABLE KEY_GROUP.Localidad;
-
-IF OBJECT_ID('KEY_GROUP.Provincia', 'U') IS NOT NULL
-    DROP TABLE KEY_GROUP.Provincia;
-
-
--- dropear SP
-
-IF OBJECT_ID('KEY_GROUP.migrar_Provincia', 'P') IS NOT NULL
-    DROP PROCEDURE KEY_GROUP.migrar_Provincia;
-
-IF OBJECT_ID('KEY_GROUP.migrar_Localidad', 'P') IS NOT NULL
-    DROP PROCEDURE KEY_GROUP.migrar_Localidad;
-
-IF OBJECT_ID('KEY_GROUP.migrar_Profesor', 'P') IS NOT NULL
-    DROP PROCEDURE KEY_GROUP.migrar_Profesor;
-
-IF OBJECT_ID('KEY_GROUP.migrar_Institucion', 'P') IS NOT NULL
-    DROP PROCEDURE KEY_GROUP.migrar_Institucion;
-
-IF OBJECT_ID('KEY_GROUP.migrar_Sede', 'P') IS NOT NULL
-    DROP PROCEDURE KEY_GROUP.migrar_Sede;
-
-IF OBJECT_ID('KEY_GROUP.migrar_Turno', 'P') IS NOT NULL
-    DROP PROCEDURE KEY_GROUP.migrar_Turno;
-
-IF OBJECT_ID('KEY_GROUP.migrar_Curso', 'P') IS NOT NULL
-    DROP PROCEDURE KEY_GROUP.migrar_Curso;
-
-
-
+DROP SCHEMA KEY_GROUP;

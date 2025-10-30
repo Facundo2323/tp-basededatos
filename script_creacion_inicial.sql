@@ -1,7 +1,7 @@
 USE GD2C2025
 GO
 
-CREATE SCHEMA KEY_GROUP;
+CREATE SCHEMA KEY_GROUP
 GO
 
 --Creacion de las tablas
@@ -133,7 +133,7 @@ CREATE TABLE KEY_GROUP.Detalle_Factura (
 
     CONSTRAINT PK_Detalle_Factura_id PRIMARY KEY (id_detalle_factura),
     CONSTRAINT FK_Detalle_Factura_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Alumno' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Alumno (
@@ -149,7 +149,7 @@ CREATE TABLE KEY_GROUP.Alumno (
 
     CONSTRAINT PK_Alumno_legajo PRIMARY KEY (legajo_alumno),
     CONSTRAINT FK_Alumno_localidad FOREIGN KEY (id_localidad) REFERENCES KEY_GROUP.Localidad(id_localidad)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Factura' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Factura (
@@ -163,34 +163,34 @@ CREATE TABLE KEY_GROUP.Factura (
     CONSTRAINT PK_Factura_id PRIMARY KEY (id_factura),
     CONSTRAINT FK_Factura_detalle FOREIGN KEY (id_detalle_factura) REFERENCES KEY_GROUP.Detalle_Factura(id_detalle_factura),
     CONSTRAINT FK_Factura_alumno FOREIGN KEY (legajo_alumno) REFERENCES KEY_GROUP.Alumno(legajo_alumno)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Medio_de_Pago' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Medio_de_Pago (
     codigo_medio_de_pago NVARCHAR(255)
 
     CONSTRAINT PK_Medio_Pago_codigo PRIMARY KEY (codigo_medio_de_pago)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Pago' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Pago (
     id_pago BIGINT IDENTITY(1,1),
     id_factura BIGINT,
     fecha_pago DATETIME2(6),
-    codigo_medio_de_pago BIGINT,
+    codigo_medio_de_pago NVARCHAR(255),
     importe DECIMAL(18,2),
 
     CONSTRAINT PK_Pago_id PRIMARY KEY (id_pago),
     CONSTRAINT FK_Pago_factura FOREIGN KEY (id_factura) REFERENCES KEY_GROUP.Factura(id_factura),
     CONSTRAINT FK_Pago_medio_pago FOREIGN KEY (codigo_medio_de_pago) REFERENCES KEY_GROUP.Medio_de_Pago(codigo_medio_de_pago)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Estado_Inscripcion' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Estado_Inscripcion (
     codigo_estado_inscripcion VARCHAR(255) NOT NULL,
 
     CONSTRAINT PK_Estado_Inscripcion_codigo PRIMARY KEY (codigo_estado_inscripcion)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Inscripcion' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Inscripcion (
@@ -205,24 +205,24 @@ CREATE TABLE KEY_GROUP.Inscripcion (
     CONSTRAINT FK_Inscripcion_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso),
     CONSTRAINT FK_Inscripcion_alumno FOREIGN KEY (legajo_alumno) REFERENCES KEY_GROUP.Alumno(legajo_alumno),
     CONSTRAINT FK_Inscripcion_estado FOREIGN KEY (codigo_estado_inscripcion) REFERENCES KEY_GROUP.Estado_Inscripcion(codigo_estado_inscripcion)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Dia' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Dia (
     dia CHAR(3) NOT NULL,
 
     CONSTRAINT PK_Dia_dia PRIMARY KEY (dia)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Curso_por_Dia' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Curso_por_Dia (
-    dia CHAR(3) NOT NULL,
-    codigo_curso BIGINT NOT NULL,
+    dia CHAR(3),
+    codigo_curso BIGINT,
     
     CONSTRAINT PK_Curso_por_Dia PRIMARY KEY (dia, codigo_curso),
     CONSTRAINT FK_Curso_por_Dia_Dia FOREIGN KEY (dia) REFERENCES KEY_GROUP.Dia(dia),
     CONSTRAINT FK_Curso_por_Dia_Curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Modulo' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Modulo (
@@ -231,7 +231,7 @@ CREATE TABLE KEY_GROUP.Modulo (
     descripcion NVARCHAR(255),
 
     CONSTRAINT PK_Modulo_id PRIMARY KEY (id_modulo)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Modulo_por_Curso' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Modulo_por_Curso (
@@ -242,7 +242,7 @@ CREATE TABLE KEY_GROUP.Modulo_por_Curso (
     CONSTRAINT PK_Modulo_Curso_id PRIMARY KEY (id_modulo_curso),
     CONSTRAINT FK_Modulo_Curso_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso),
     CONSTRAINT FK_Modulo_Curso_modulo FOREIGN KEY (id_modulo) REFERENCES KEY_GROUP.Modulo(id_modulo)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Trabajo_Practico' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Trabajo_Practico (
@@ -255,7 +255,7 @@ CREATE TABLE KEY_GROUP.Trabajo_Practico (
     CONSTRAINT PK_Trabajo_Practico_id PRIMARY KEY (id_trabajo_practico),
     CONSTRAINT FK_Trabajo_Practico_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso),
     CONSTRAINT FK_Trabajo_Practico_alumno FOREIGN KEY (legajo_alumno) REFERENCES KEY_GROUP.Alumno(legajo_alumno)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Evaluacion' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Evaluacion (
@@ -272,7 +272,7 @@ CREATE TABLE KEY_GROUP.Evaluacion (
     CONSTRAINT FK_Evaluacion_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso),
     CONSTRAINT FK_Evaluacion_modulo FOREIGN KEY (id_modulo) REFERENCES KEY_GROUP.Modulo(id_modulo),
     CONSTRAINT FK_Evaluacion_alumno FOREIGN KEY (legajo_alumno) REFERENCES KEY_GROUP.Alumno(legajo_alumno)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Final' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Final (
@@ -283,7 +283,7 @@ CREATE TABLE KEY_GROUP.Final (
 
     CONSTRAINT PK_Final_id PRIMARY KEY (id_final),
     CONSTRAINT FK_Final_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Inscripcion_Final' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Inscripcion_Final (
@@ -295,7 +295,7 @@ CREATE TABLE KEY_GROUP.Inscripcion_Final (
     CONSTRAINT PK_Inscripcion_Final_id PRIMARY KEY (id_inscripcion_final),
     CONSTRAINT FK_Inscripcion_Final_alumno FOREIGN KEY (legajo_alumno) REFERENCES KEY_GROUP.Alumno(legajo_alumno),
     CONSTRAINT FK_Inscripcion_Final_final FOREIGN KEY (id_final) REFERENCES KEY_GROUP.Final(id_final)
-)
+);
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Evaluacion_Final' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Evaluacion_Final (
@@ -311,23 +311,19 @@ CREATE TABLE KEY_GROUP.Evaluacion_Final (
     CONSTRAINT FK_Evaluacion_Final_final FOREIGN KEY (id_final) REFERENCES KEY_GROUP.Final(id_final),
     CONSTRAINT FK_Evaluacion_Final_profesor FOREIGN KEY (id_profesor) REFERENCES KEY_GROUP.Profesor(id_profesor),
     CONSTRAINT FK_Evaluacion_Final_alumno FOREIGN KEY (legajo_alumno) REFERENCES KEY_GROUP.Alumno(legajo_alumno)
-)
+);
 
 -- Migracion de datos --> Stored procedures
-
+GO
 CREATE PROCEDURE KEY_GROUP.migrar_Provincia
 AS  
     BEGIN
-
-
-    INSERT INTO KEY_GROUP.Provincia (Nombre)
-
-        SELECT DISTINCT Sede_Localidad AS Nombre FROM gd_esquema.Maestra WHERE Sede_Localidad IS NOT NULL --mal los campos de la maestra
-        UNION
-        SELECT DISTINCT Alumno_Provincia AS Nombre FROM gd_esquema.Maestra WHERE Alumno_Provincia IS NOT NULL
-        UNION
-        SELECT DISTINCT Profesor_Provincia AS Nombre FROM gd_esquema.Maestra WHERE Profesor_Provincia IS NOT NULL
-
+        INSERT INTO KEY_GROUP.Provincia (nombre)
+            SELECT DISTINCT Sede_Localidad AS Nombre FROM gd_esquema.Maestra WHERE Sede_Localidad IS NOT NULL --mal los campos de la maestra
+            UNION
+            SELECT DISTINCT Alumno_Provincia AS Nombre FROM gd_esquema.Maestra WHERE Alumno_Provincia IS NOT NULL
+            UNION
+            SELECT DISTINCT Profesor_Provincia AS Nombre FROM gd_esquema.Maestra WHERE Profesor_Provincia IS NOT NULL
     END
 GO  
 
@@ -357,6 +353,7 @@ AS
                 WHERE Profesor_Localidad IS NOT NULL AND Profesor_Provincia IS NOT NULL
                 ) AS Loc
             JOIN KEY_GROUP.Provincia P ON Loc.Provincia_nombre = P.nombre 
+            ORDER BY 1, 2
     END 
 GO
 
@@ -364,7 +361,7 @@ CREATE PROCEDURE KEY_GROUP.migrar_Profesor
 AS 
     BEGIN
         INSERT INTO KEY_GROUP.Profesor (dni, nombre, apellido, fecha_nacimiento, mail, direccion, telefono, id_localidad)
-            SELECT P.Dni, P.Nombre, P.Apellido, P.FechaNacimiento, P.Mail, P.Direccion, P.Telefono, L.id_localidad, P.Localidad
+            SELECT P.Dni, P.Nombre, P.Apellido, P.FechaNacimiento, P.Mail, P.Direccion, P.Telefono, L.id_localidad
             FROM (SELECT DISTINCT   Profesor_Dni AS Dni, 
                                     Profesor_nombre AS Apellido, --estan invertidos nombre y apellido
                                     Profesor_Apellido AS Nombre, 
@@ -372,7 +369,7 @@ AS
                                     Profesor_Mail AS Mail, 
                                     Profesor_Direccion AS Direccion, 
                                     Profesor_Telefono AS Telefono,
-                                    Provincia_Nombre AS Localidad
+                                    Profesor_Localidad AS Localidad
                     FROM GD2C2025.gd_esquema.Maestra WHERE Profesor_Dni IS NOT NULL) AS P
                     JOIN KEY_GROUP.Localidad L ON L.nombre = P.Localidad
     END
@@ -389,7 +386,7 @@ AS
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Sede --falta id_localidad (dice solo la provincia)
+CREATE PROCEDURE KEY_GROUP.migrar_Sede 
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Sede (id_institucion, nombre, direccion, telefono, mail)
@@ -424,7 +421,7 @@ AS
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Curso --faltan id_profesor, id_sede
+CREATE PROCEDURE KEY_GROUP.migrar_Curso 
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Curso (codigo_curso, nombre, descripcion, id_categoria, fecha_inicio, fecha_fin, duracion_meses, tipo_turno, precio_mensual)
@@ -437,16 +434,12 @@ AS
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Encuesta --falta codigo_curso
+CREATE PROCEDURE KEY_GROUP.migrar_Encuesta
 AS
     BEGIN
-        INSERT INTO KEY_GROUP.Encuesta (codigo_curso, fecha_registro, observaciones) 
-            SELECT DISTINCT C.Codigo_Curso, M.Encuesta_FechaRegistro, M.Encuesta_Observacion
+        INSERT INTO KEY_GROUP.Encuesta (fecha_registro, observaciones) 
+            SELECT DISTINCT M.Encuesta_FechaRegistro, M.Encuesta_Observacion
             FROM gd_esquema.Maestra M
-            
-            JOIN KEY_GROUP.migrar_Curso C
-            ON C.EncuestaFechaRegistro = M.Encuesta_FechaRegistro
-
             WHERE Encuesta_FechaRegistro IS NOT NULL AND Encuesta_Observacion IS NOT NULL
             ORDER BY 1
     END
@@ -484,7 +477,7 @@ GO
 
 CREATE PROCEDURE KEY_GROUP.migrar_Detalle_factura
 AS
-    BEGIN --en la tabla figura el periodo como BIGINT, cambiarlo
+    BEGIN
         INSERT INTO KEY_GROUP.Detalle_factura (periodo, importe)
             SELECT DISTINCT FORMAT(Factura_FechaEmision, 'MM/yyyy') AS periodo, M.Detalle_Factura_Importe
             FROM gd_esquema.Maestra M
@@ -493,12 +486,13 @@ GO
 
 CREATE PROCEDURE KEY_GROUP.migrar_Alumno
 AS
-    BEGIN --hay que corregir apellido, nombre, mail, localidad, provincia y direccion
+    BEGIN 
         INSERT INTO KEY_GROUP.Alumno (legajo_alumno, dni, nombre, apellido, fecha_nacimiento, mail, direccion, id_localidad, telefono)
             SELECT DISTINCT M.Alumno_Legajo, M.Alumno_Dni, M.Alumno_Nombre, M.Alumno_Apellido, M.Alumno_FechaNacimiento, M.Alumno_Mail, M.Alumno_Direccion, L.id_localidad, M.Alumno_Telefono
             FROM gd_esquema.Maestra M
 
             JOIN KEY_GROUP.Localidad L ON L.nombre = M.Alumno_Localidad
+            JOIN KEY_GROUP.Provincia P ON P.id_provincia = L.id_provincia AND P.nombre = M.Alumno_Provincia
             ORDER BY 1
     END
 GO
@@ -511,7 +505,7 @@ AS
             FROM gd_esquema.Maestra M
 
             JOIN KEY_GROUP.Detalle_Factura D ON D.importe = M.Detalle_Factura_Importe
-            JOIN KEY_GROUP.Alumno A ON A.legajo = M.Alumno_Legajo
+            JOIN KEY_GROUP.Alumno A ON A.legajo_alumno = M.Alumno_Legajo
     END
 GO
 
@@ -524,15 +518,14 @@ AS
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Pago
+CREATE PROCEDURE KEY_GROUP.migrar_Pago 
 AS
     BEGIN
-        INSERT INTO KEY_GROUP.Pago (id_factura, fecha_pago, codigo_medio_de_pago, importe)
-        SELECT DISTINCT Fact.id_factura, M.Pago_Fecha, MP.codigo_medio_de_pago, M.Pago_Importe
+        INSERT INTO KEY_GROUP.Pago (fecha_pago, codigo_medio_de_pago, importe)
+        SELECT DISTINCT M.Pago_Fecha, MP.codigo_medio_de_pago, M.Pago_Importe
         FROM gd_esquema.Maestra M 
 
         JOIN KEY_GROUP.Medio_de_pago MP ON MP.codigo_medio_de_pago = M.Pago_MedioPago
-        -- falta id_factura
         
         WHERE M.Pago_Fecha IS NOT NULL AND M.Pago_Importe IS NOT NULL
         
@@ -549,7 +542,7 @@ AS
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Inscripcion --falta codigo_curso, legajo_alumno
+CREATE PROCEDURE KEY_GROUP.migrar_Inscripcion
 AS
     BEGIN 
         INSERT INTO KEY_GROUP.Inscripcion (fecha_inscripcion, fecha_respuesta, codigo_estado_inscripcion)
@@ -573,7 +566,7 @@ CREATE PROCEDURE KEY_GROUP.migrar_Curso_por_dia
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Curso_por_Dia (dia, codigo_curso) 
-            SELECT DISTINCT Curso_Dia, C.codigo_curso
+            SELECT DISTINCT LEFT(Curso_Dia, 3), C.codigo_curso
             FROM gd_esquema.Maestra M
             JOIN KEY_GROUP.Curso C ON C.nombre = M.Curso_Nombre
             WHERE Curso_Dia IS NOT NULL
@@ -583,22 +576,15 @@ GO
 CREATE PROCEDURE KEY_GROUP.migrar_Modulo
 AS
     BEGIN
-        SELECT DISTINCT Modulo_Nombre, Modulo_Descripcion
-        FROM gd_esquema.Maestra
-		WHERE Modulo_Nombre IS NOT NULL AND Modulo_Descripcion IS NOT NULL
-		ORDER BY 1
+        INSERT INTO KEY_GROUP.Modulo(nombre, descripcion)
+            SELECT DISTINCT Modulo_Nombre, Modulo_Descripcion
+            FROM gd_esquema.Maestra
+            WHERE Modulo_Nombre IS NOT NULL AND Modulo_Descripcion IS NOT NULL
+            ORDER BY 1
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Modulo_por_curso
-AS
-    BEGIN
-        INSERT INTO KEY_GROUP.Modulo_por_curso (id_curso, id_modulo)
-            SELECT DISTINCT 
-    END
-GO
-
-CREATE PROCEDURE KEY_GROUP.migrar_Trabajo_practico --falta codigo_curso y legajo_alumno
+CREATE PROCEDURE KEY_GROUP.migrar_Trabajo_practico
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Trabajo_practico (fecha_evaluacion, nota)
@@ -607,10 +593,10 @@ AS
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Evaluacion --faltan codigo_curso, id_modulo, legajo_alumno
+CREATE PROCEDURE KEY_GROUP.migrar_Evaluacion 
 AS
     BEGIN
-        INSERT INTO KEY_GROUP.Evaluacion (fecha_evaluacion, nota, codigo_curso, id_modulo, presente, instancia, legajo_alumno)
+        INSERT INTO KEY_GROUP.Evaluacion (fecha_evaluacion, nota, presente, instancia)
             SELECT DISTINCT Evaluacion_Curso_fechaEvaluacion, Evaluacion_Curso_Nota, Evaluacion_Curso_Presente, Evaluacion_Curso_Instancia
             FROM gd_esquema.Maestra
     END
@@ -619,13 +605,13 @@ GO
 CREATE PROCEDURE KEY_GROUP.migrar_Final
 AS
     BEGIN
-        INSERT INTO KEY_GROUP.Final (codigo_curso, fecha_final, hora_final) -- falta id_curso
+        INSERT INTO KEY_GROUP.Final (fecha_final, hora) 
         SELECT DISTINCT M.Examen_Final_Fecha, M.Examen_Final_Hora
         FROM gd_esquema.Maestra M
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Inscripcion_final --falta legajo_alumno, id_final
+CREATE PROCEDURE KEY_GROUP.migrar_Inscripcion_final
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Inscripcion_final (id_inscripcion_final, fecha_inscripcion_final)
@@ -636,7 +622,7 @@ AS
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Evaluacion_final --falta id_final, id_profesor, legajo_alumno
+CREATE PROCEDURE KEY_GROUP.migrar_Evaluacion_final
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Evaluacion_final (presente, nota, descripcion)
@@ -684,13 +670,6 @@ AS
         UPDATE KEY_GROUP.Alumno
         SET nombre = REPLACE(nombre, ';', 'go')
         WHERE nombre LIKE '%_;%';
-        --localidad
-        UPDATE KEY_GROUP.Alumno
-        SET localidad = REPLACE(localidad, ';', 'Go')
-        WHERE localidad LIKE ';%';
-        UPDATE KEY_GROUP.Alumno
-        SET localidad = REPLACE(localidad, ';', 'go')
-        WHERE localidad LIKE '%_;%';
         --direccion
         UPDATE KEY_GROUP.Alumno
         SET direccion = REPLACE(direccion, ';', 'go')
@@ -698,40 +677,38 @@ AS
     END 
 GO
 
-
-
-CREATE NONCLUSTERED INDEX IX_Localidad_provincia ON Localidad(id_provincia);
-CREATE NONCLUSTERED INDEX IX_Profesor_localidad ON Profesor(id_localidad);
-CREATE NONCLUSTERED INDEX IX_Sede_institucion ON Sede(id_institucion);
-CREATE NONCLUSTERED INDEX IX_Sede_localidad ON Sede(id_localidad);
-CREATE NONCLUSTERED INDEX IX_Curso_categoria ON Curso(id_categoria);
-CREATE NONCLUSTERED INDEX IX_Curso_sede ON Curso(id_sede);
-CREATE NONCLUSTERED INDEX IX_Curso_turno ON Curso(tipo_turno);
-CREATE NONCLUSTERED INDEX IX_Curso_profesor ON Curso(id_profesor);
-CREATE NONCLUSTERED INDEX IX_Encuesta_curso ON Encuesta(codigo_curso);
-CREATE NONCLUSTERED INDEX IX_Pregunta_encuesta ON Pregunta(id_encuesta);
-CREATE NONCLUSTERED INDEX IX_Detalle_Factura_curso ON Detalle_Factura(codigo_curso);
-CREATE NONCLUSTERED INDEX IX_Alumno_localidad ON Alumno(id_localidad);
-CREATE UNIQUE NONCLUSTERED INDEX IX_Factura_detalle ON Factura(id_detalle_factura);
-CREATE NONCLUSTERED INDEX IX_Factura_alumno ON Factura(legajo_alumno);
-CREATE UNIQUE NONCLUSTERED INDEX IX_Pago_factura ON Pago(id_factura);
-CREATE NONCLUSTERED INDEX IX_Pago_medio_pago ON Pago(codigo_medio_de_pago);
-CREATE NONCLUSTERED INDEX IX_Inscripcion_curso ON Inscripcion(codigo_curso);
-CREATE NONCLUSTERED INDEX IX_Inscripcion_alumno ON Inscripcion(legajo_alumno);
-CREATE NONCLUSTERED INDEX IX_Inscripcion_estado ON Inscripcion(codigo_estado_inscripcion);
-CREATE NONCLUSTERED INDEX IX_Modulo_Curso_curso ON Modulo_por_Curso(codigo_curso);
-CREATE NONCLUSTERED INDEX IX_Modulo_Curso_modulo ON Modulo_por_Curso(id_modulo);
-CREATE NONCLUSTERED INDEX IX_Trabajo_Practico_curso ON Trabajo_Practico(codigo_curso);
-CREATE NONCLUSTERED INDEX IX_Trabajo_Practico_alumno ON Trabajo_Practico(legajo_alumno);
-CREATE NONCLUSTERED INDEX IX_Evaluacion_curso ON Evaluacion(codigo_curso);
-CREATE NONCLUSTERED INDEX IX_Evaluacion_modulo ON Evaluacion(id_modulo);
-CREATE NONCLUSTERED INDEX IX_Evaluacion_alumno ON Evaluacion(legajo_alumno);
-CREATE NONCLUSTERED INDEX IX_Final_curso ON Final(codigo_curso);
-CREATE NONCLUSTERED INDEX IX_Inscripcion_Final_alumno ON Inscripcion_Final(legajo_alumno);
-CREATE NONCLUSTERED INDEX IX_Inscripcion_Final_final ON Inscripcion_Final(id_final);
-CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_final ON Evaluacion_Final(id_final);
-CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_profesor ON Evaluacion_Final(id_profesor);
-CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_alumno ON Evaluacion_Final(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Localidad_provincia ON KEY_GROUP.Localidad(id_provincia);
+CREATE NONCLUSTERED INDEX IX_Profesor_localidad ON KEY_GROUP.Profesor(id_localidad);
+CREATE NONCLUSTERED INDEX IX_Sede_institucion ON KEY_GROUP.Sede(id_institucion);
+CREATE NONCLUSTERED INDEX IX_Sede_localidad ON KEY_GROUP.Sede(id_localidad);
+CREATE NONCLUSTERED INDEX IX_Curso_categoria ON KEY_GROUP.Curso(id_categoria);
+CREATE NONCLUSTERED INDEX IX_Curso_sede ON KEY_GROUP.Curso(id_sede);
+CREATE NONCLUSTERED INDEX IX_Curso_turno ON KEY_GROUP.Curso(tipo_turno);
+CREATE NONCLUSTERED INDEX IX_Curso_profesor ON KEY_GROUP.Curso(id_profesor);
+CREATE NONCLUSTERED INDEX IX_Encuesta_curso ON KEY_GROUP.Encuesta(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Pregunta_encuesta ON KEY_GROUP.Pregunta(id_encuesta);
+CREATE NONCLUSTERED INDEX IX_Detalle_Factura_curso ON KEY_GROUP.Detalle_Factura(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Alumno_localidad ON KEY_GROUP.Alumno(id_localidad);
+CREATE NONCLUSTERED INDEX IX_Factura_detalle ON KEY_GROUP.Factura(id_detalle_factura);
+CREATE NONCLUSTERED INDEX IX_Factura_alumno ON KEY_GROUP.Factura(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Pago_factura ON KEY_GROUP.Pago(id_factura);
+CREATE NONCLUSTERED INDEX IX_Pago_medio_pago ON KEY_GROUP.Pago(codigo_medio_de_pago);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_curso ON KEY_GROUP.Inscripcion(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_alumno ON KEY_GROUP.Inscripcion(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_estado ON KEY_GROUP.Inscripcion(codigo_estado_inscripcion);
+CREATE NONCLUSTERED INDEX IX_Modulo_Curso_curso ON KEY_GROUP.Modulo_por_Curso(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Modulo_Curso_modulo ON KEY_GROUP.Modulo_por_Curso(id_modulo);
+CREATE NONCLUSTERED INDEX IX_Trabajo_Practico_curso ON KEY_GROUP.Trabajo_Practico(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Trabajo_Practico_alumno ON KEY_GROUP.Trabajo_Practico(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_curso ON KEY_GROUP.Evaluacion(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_modulo ON KEY_GROUP.Evaluacion(id_modulo);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_alumno ON KEY_GROUP.Evaluacion(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Final_curso ON KEY_GROUP.Final(codigo_curso);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_Final_alumno ON KEY_GROUP.Inscripcion_Final(legajo_alumno);
+CREATE NONCLUSTERED INDEX IX_Inscripcion_Final_final ON KEY_GROUP.Inscripcion_Final(id_final);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_final ON KEY_GROUP.Evaluacion_Final(id_final);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_profesor ON KEY_GROUP.Evaluacion_Final(id_profesor);
+CREATE NONCLUSTERED INDEX IX_Evaluacion_Final_alumno ON KEY_GROUP.Evaluacion_Final(legajo_alumno);
 
 BEGIN TRANSACTION
  BEGIN TRY
@@ -755,7 +732,6 @@ BEGIN TRANSACTION
     EXECUTE KEY_GROUP.migrar_Dia
     EXECUTE KEY_GROUP.migrar_Curso_por_dia
     EXECUTE KEY_GROUP.migrar_Modulo
-    EXECUTE KEY_GROUP.migrar_Modulo_por_curso
     EXECUTE KEY_GROUP.migrar_Trabajo_practico
     EXECUTE KEY_GROUP.migrar_Evaluacion
     EXECUTE KEY_GROUP.migrar_Final
@@ -765,6 +741,7 @@ BEGIN TRANSACTION
 END TRY
 BEGIN CATCH
     ROLLBACK TRANSACTION;
-	THROW 50001, 'Ocurrió un error en la transferencia de datos.',1;
+	THROW 50001, 'Ocurrió un error en la transaccion de datos.',1;
 END CATCH
+    PRINT 'Transaccion completada correctamente';
 COMMIT TRANSACTION
