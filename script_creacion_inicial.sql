@@ -479,8 +479,9 @@ CREATE PROCEDURE KEY_GROUP.migrar_Detalle_factura
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Detalle_factura (periodo, importe)
-            SELECT DISTINCT FORMAT(Factura_FechaEmision, 'MM/yyyy') AS periodo, M.Detalle_Factura_Importe
+            SELECT FORMAT(Factura_FechaEmision, 'MM/yyyy') AS periodo, M.Detalle_Factura_Importe
             FROM gd_esquema.Maestra M
+            WHERE M.Detalle_Factura_Importe IS NOT NULL
     END
 GO
 
@@ -513,8 +514,9 @@ CREATE PROCEDURE KEY_GROUP.migrar_Medio_de_pago
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Medio_de_pago (codigo_medio_de_pago)
-        SELECT DISTINCT Pago_MedioPago FROM gd_esquema.Maestra WHERE Pago_MedioPago IS NOT NULL
-
+            SELECT DISTINCT Pago_MedioPago 
+            FROM gd_esquema.Maestra 
+            WHERE Pago_MedioPago IS NOT NULL
     END
 GO
 
@@ -522,13 +524,10 @@ CREATE PROCEDURE KEY_GROUP.migrar_Pago
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Pago (fecha_pago, codigo_medio_de_pago, importe)
-        SELECT DISTINCT M.Pago_Fecha, MP.codigo_medio_de_pago, M.Pago_Importe
-        FROM gd_esquema.Maestra M 
-
-        JOIN KEY_GROUP.Medio_de_pago MP ON MP.codigo_medio_de_pago = M.Pago_MedioPago
-        
-        WHERE M.Pago_Fecha IS NOT NULL AND M.Pago_Importe IS NOT NULL
-        
+            SELECT M.Pago_Fecha, MP.codigo_medio_de_pago, M.Pago_Importe
+            FROM gd_esquema.Maestra M 
+                JOIN KEY_GROUP.Medio_de_pago MP ON MP.codigo_medio_de_pago = M.Pago_MedioPago
+            WHERE M.Pago_Fecha IS NOT NULL AND M.Pago_Importe IS NOT NULL
     END
 GO
 
@@ -546,7 +545,7 @@ CREATE PROCEDURE KEY_GROUP.migrar_Inscripcion
 AS
     BEGIN 
         INSERT INTO KEY_GROUP.Inscripcion (fecha_inscripcion, fecha_respuesta, codigo_estado_inscripcion)
-            SELECT DISTINCT M.Inscripcion_Fecha, M.Inscripcion_FechaRespuesta, E.codigo_estado_inscripcion
+            SELECT M.Inscripcion_Fecha, M.Inscripcion_FechaRespuesta, E.codigo_estado_inscripcion
             FROM gd_esquema.Maestra M
             JOIN KEY_GROUP.Estado_Inscripcion E ON E.codigo_estado_inscripcion = M.Inscripcion_Estado
     END
@@ -588,8 +587,9 @@ CREATE PROCEDURE KEY_GROUP.migrar_Trabajo_practico
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Trabajo_practico (fecha_evaluacion, nota)
-            SELECT DISTINCT Trabajo_Practico_FechaEvaluacion, Trabajo_Practico_Nota
+            SELECT Trabajo_Practico_FechaEvaluacion, Trabajo_Practico_Nota
             FROM gd_esquema.Maestra
+            WHERE Trabajo_Practico_FechaEvaluacion IS NOT NULL
     END
 GO
 
@@ -597,8 +597,9 @@ CREATE PROCEDURE KEY_GROUP.migrar_Evaluacion
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Evaluacion (fecha_evaluacion, nota, presente, instancia)
-            SELECT DISTINCT Evaluacion_Curso_fechaEvaluacion, Evaluacion_Curso_Nota, Evaluacion_Curso_Presente, Evaluacion_Curso_Instancia
+            SELECT Evaluacion_Curso_fechaEvaluacion, Evaluacion_Curso_Nota, Evaluacion_Curso_Presente, Evaluacion_Curso_Instancia
             FROM gd_esquema.Maestra
+            WHERE Evaluacion_Curso_fechaEvaluacion IS NOT NULL
     END
 GO
 
