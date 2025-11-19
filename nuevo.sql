@@ -218,7 +218,6 @@ CREATE TABLE KEY_GROUP.Inscripcion (
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Dia' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Dia (
     dia CHAR(3) NOT NULL,
-    detalle NVARCHAR(255),
 
     CONSTRAINT PK_Dia_dia PRIMARY KEY (dia)
 );
@@ -433,14 +432,13 @@ GO
 CREATE PROCEDURE KEY_GROUP.migrar_Curso 
 AS
     BEGIN
-        INSERT INTO KEY_GROUP.Curso (codigo_curso, nombre, descripcion, id_categoria, fecha_inicio, fecha_fin, id_sede, duracion_meses, tipo_turno, precio_mensual, id_profesor)
-            SELECT DISTINCT M.Curso_Codigo, M.Curso_Nombre, M.Curso_Descripcion, C.id_categoria, M.Curso_FechaInicio, M.Curso_FechaFin, M.Curso_DuracionMeses, T.tipo_turno, M.Curso_PrecioMensual
+        INSERT INTO KEY_GROUP.Curso (codigo_curso, nombre, descripcion, id_categoria, fecha_inicio, fecha_fin, duracion_meses, tipo_turno, precio_mensual, id_profesor)
+            SELECT DISTINCT M.Curso_Codigo, M.Curso_Nombre, M.Curso_Descripcion, C.id_categoria, M.Curso_FechaInicio, M.Curso_FechaFin, M.Curso_DuracionMeses, T.tipo_turno, M.Curso_PrecioMensual, P.id_profesor
             FROM gd_esquema.Maestra M
 
             JOIN KEY_GROUP.Categoria C ON C.descripcion = M.Curso_Categoria
             JOIN KEY_GROUP.Turno T ON T.descripcion = M.Curso_Turno
             JOIN KEY_GROUP.Profesor P ON P.dni = M.Profesor_Dni
-            JOIN KEY_GROUP.Sede S ON S.nombre = M.Sede_Nombre
             ORDER BY 1
     END
 GO
@@ -461,11 +459,8 @@ CREATE PROCEDURE KEY_GROUP.migrar_Encuesta
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Encuesta (fecha_registro, observaciones, codigo_curso) 
-            SELECT DISTINCT M.Encuesta_FechaRegistro, M.Encuesta_Observacion, C.codigo_curso
+            SELECT DISTINCT M.Encuesta_FechaRegistro, M.Encuesta_Observacion, M.Curso_Codigo
             FROM gd_esquema.Maestra M
-
-            JOIN KEY_GROUP.Curso C ON M.Curso_Codigo = C.codigo_curso
-
             WHERE Encuesta_FechaRegistro IS NOT NULL AND Encuesta_Observacion IS NOT NULL
             ORDER BY 1
     END
@@ -505,11 +500,8 @@ CREATE PROCEDURE KEY_GROUP.migrar_Detalle_factura
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Detalle_factura (periodo, importe, codigo_curso)
-            SELECT FORMAT(Factura_FechaEmision, 'MM/yyyy') AS periodo, M.Detalle_Factura_Importe, C.codigo_curso
+            SELECT FORMAT(Factura_FechaEmision, 'MM/yyyy') AS periodo, M.Detalle_Factura_Importe, M.Curso_Codigo
             FROM gd_esquema.Maestra M
-
-            JOIN KEY_GROUP.Curso C ON M.Curso_Codigo = C.codigo_curso
-
             WHERE M.Detalle_Factura_Importe IS NOT NULL
     END
 GO
@@ -529,13 +521,12 @@ GO
 
 CREATE PROCEDURE KEY_GROUP.migrar_Factura
 AS
-    BEGIN --cambié el identity de id_factura por el atributo factura_numero de la tabla Maestra
+    BEGIN --cambié el identity de factura_numero por el atributo factura_numero de la tabla Maestra
         INSERT INTO KEY_GROUP.Factura (factura_numero, fecha_emision, fecha_vencimiento, importe_total, id_detalle_factura, legajo_alumno)
-            SELECT DISTINCT M.Factura_Numero, M.Factura_FechaEmision, M.Factura_FechaVencimiento, M.Factura_Total, D.id_detalle_factura, A.legajo_alumno
+            SELECT DISTINCT M.Factura_Numero, M.Factura_FechaEmision, M.Factura_FechaVencimiento, M.Factura_Total, D.id_detalle_factura, M.Alumno_Legajo
             FROM gd_esquema.Maestra M
 
             JOIN KEY_GROUP.Detalle_Factura D ON D.importe = M.Detalle_Factura_Importe
-            JOIN KEY_GROUP.Alumno A ON M.Alumno_Legajo = A.legajo_alumno
     END
 GO
 
@@ -556,7 +547,7 @@ AS
             SELECT M.Pago_Fecha, F.factura_numero, MP.codigo_medio_de_pago, M.Pago_Importe
             FROM gd_esquema.Maestra M 
                 JOIN KEY_GROUP.Medio_de_pago MP ON MP.codigo_medio_de_pago = M.Pago_MedioPago
-                JOIN KEY_GROUP.Factura F ON F.factura_numero = M.Factura_Numero -- chequear esto despues, factura_numero no es lo mismo que id_factura
+                JOIN KEY_GROUP.Factura F ON F.factura_numero = M.Factura_Numero -- chequear esto despues, factura_numero no es lo mismo que factura_numero
             WHERE M.Pago_Fecha IS NOT NULL AND M.Pago_Importe IS NOT NULL
     END
 GO
@@ -575,20 +566,17 @@ CREATE PROCEDURE KEY_GROUP.migrar_Inscripcion
 AS
     BEGIN 
         INSERT INTO KEY_GROUP.Inscripcion (fecha_inscripcion, fecha_respuesta, codigo_estado_inscripcion, codigo_curso, legajo_alumno)
-            SELECT M.Inscripcion_Fecha, M.Inscripcion_FechaRespuesta, E.codigo_estado_inscripcion, C.codigo_curso, A.legajo_alumno
+            SELECT M.Inscripcion_Fecha, M.Inscripcion_FechaRespuesta, E.codigo_estado_inscripcion, M.Curso_Codigo, M.Alumno_Legajo
             FROM gd_esquema.Maestra M
-
             JOIN KEY_GROUP.Estado_Inscripcion E ON E.codigo_estado_inscripcion = M.Inscripcion_Estado
-            JOIN KEY_GROUP.Curso C ON M.Curso_Codigo = C.codigo_curso
-            JOIN KEY_GROUP.Alumno A ON M.Alumno_Legajo = A.legajo_alumno
     END
 GO
 
 CREATE PROCEDURE KEY_GROUP.migrar_Dia
 AS
     BEGIN
-        INSERT INTO KEY_GROUP.Dia (dia, detalle)
-            SELECT DISTINCT LEFT(Curso_Dia, 3), Curso_Dia
+        INSERT INTO KEY_GROUP.Dia 
+            SELECT DISTINCT LEFT(Curso_Dia, 3)
             FROM gd_esquema.Maestra
             WHERE Curso_Dia IS NOT NULL
     END
@@ -598,12 +586,8 @@ CREATE PROCEDURE KEY_GROUP.migrar_Curso_por_dia
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Curso_por_Dia (dia, codigo_curso) 
-            SELECT DISTINCT D.dia, M.Curso_Codigo
+            SELECT DISTINCT LEFT(Curso_Dia, 3), M.Curso_Codigo
             FROM gd_esquema.Maestra M
-
-            JOIN KEY_GROUP.Dia D ON Curso_Dia = D.detalle
-            JOIN KEY_GROUP.Curso C ON M.Curso_Codigo = C.codigo_curso
-
             WHERE Curso_Dia IS NOT NULL
     END
 GO
@@ -623,11 +607,10 @@ CREATE PROCEDURE KEY_GROUP.migrar_Modulo_por_Curso
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Modulo_por_Curso(id_modulo, codigo_curso)
-            SELECT DISTINCT md.id_modulo, C.codigo_curso
+            SELECT DISTINCT md.id_modulo, M.Curso_Codigo
             FROM gd_esquema.Maestra M
 
             JOIN KEY_GROUP.Modulo md ON M.Modulo_Descripcion = md.descripcion
-            JOIN KEY_GROUP.Curso C ON M.Curso_Codigo = C.codigo_curso
     END
 GO
 
@@ -635,12 +618,8 @@ CREATE PROCEDURE KEY_GROUP.migrar_Trabajo_practico
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Trabajo_practico (fecha_evaluacion, nota, codigo_curso, legajo_alumno)
-            SELECT Trabajo_Practico_FechaEvaluacion, Trabajo_Practico_Nota, C.codigo_curso, A.legajo_alumno
-            FROM gd_esquema.Maestra M
-
-            JOIN KEY_GROUP.Curso C ON M.Curso_Codigo = C.codigo_curso
-            JOIN KEY_GROUP.Alumno A ON M.Alumno_Legajo = A.legajo_alumno
-
+            SELECT Trabajo_Practico_FechaEvaluacion, Trabajo_Practico_Nota, Curso_Codigo, Alumno_Legajo
+            FROM gd_esquema.Maestra
             WHERE Trabajo_Practico_FechaEvaluacion IS NOT NULL
     END
 GO
@@ -659,13 +638,9 @@ CREATE PROCEDURE KEY_GROUP.migrar_Final
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Final (fecha_final, hora, codigo_curso) 
-            SELECT DISTINCT M.Examen_Final_Fecha, M.Examen_Final_Hora, C.codigo_curso
-            FROM gd_esquema.Maestra M
-            
-            JOIN KEY_GROUP.Curso C ON M.Curso_Codigo = C.codigo_curso
-
-            WHERE M.Examen_Final_Fecha IS NOT NULL
-
+        SELECT DISTINCT M.Examen_Final_Fecha, M.Examen_Final_Hora, M.Curso_Codigo
+        FROM gd_esquema.Maestra M
+        WHERE M.Examen_Final_Fecha IS NOT NULL
     END
 GO
 
@@ -673,11 +648,10 @@ CREATE PROCEDURE KEY_GROUP.migrar_Inscripcion_final
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Inscripcion_final (id_inscripcion_final, fecha_inscripcion_final, legajo_alumno, id_final)
-            SELECT DISTINCT Inscripcion_Final_Nro, Inscripcion_Final_Fecha, A.legajo_alumno, F.id_final
+            SELECT DISTINCT Inscripcion_Final_Nro, Inscripcion_Final_Fecha, M.Alumno_Legajo, F.id_final
             FROM gd_esquema.Maestra M
 
             JOIN KEY_GROUP.Final F ON M.Examen_Final_Fecha = F.fecha_final AND M.Examen_Final_Hora = F.hora
-            JOIN KEY_GROUP.Alumno A ON M.Alumno_Legajo = A.legajo_alumno
 
             WHERE Inscripcion_Final_Nro IS NOT NULL
             ORDER BY 1
@@ -688,12 +662,11 @@ CREATE PROCEDURE KEY_GROUP.migrar_Evaluacion_final
 AS
     BEGIN
         INSERT INTO KEY_GROUP.Evaluacion_final (presente, nota, descripcion, id_final, id_profesor, legajo_alumno)
-            SELECT DISTINCT Evaluacion_Final_Presente, Evaluacion_Final_Nota, Examen_Final_Descripcion, F.id_final, P.id_profesor, A.legajo_alumno
+            SELECT DISTINCT Evaluacion_Final_Presente, Evaluacion_Final_Nota, Examen_Final_Descripcion, F.id_final, P.id_profesor, M.Alumno_Legajo
             FROM gd_esquema.Maestra M
 
             JOIN KEY_GROUP.Final F      ON M.Examen_Final_Fecha = F.fecha_final AND M.Examen_Final_Hora = F.hora
             JOIN KEY_GROUP.Profesor P   ON M.Profesor_Dni = P.dni AND M.Profesor_Mail = P.mail
-            JOIN KEY_GROUP.Alumno A     ON M.Alumno_Legajo = A.legajo_alumno
     END
 GO
 
@@ -803,7 +776,7 @@ BEGIN TRANSACTION
     EXECUTE KEY_GROUP.migrar_Modulo_por_Curso--
     EXECUTE KEY_GROUP.migrar_Trabajo_practico--
     EXECUTE KEY_GROUP.migrar_Evaluacion
-    EXECUTE KEY_GROUP.migrar_Final
+    EXECUTE KEY_GROUP.migrar_Final--
     EXECUTE KEY_GROUP.migrar_Inscripcion_final
     EXECUTE KEY_GROUP.migrar_Evaluacion_final
     EXECUTE KEY_GROUP.Correccion_General
@@ -814,3 +787,5 @@ BEGIN CATCH
 END CATCH
     PRINT 'Transaccion completada correctamente';
 COMMIT TRANSACTION
+
+SELECT * FROM KEY_GROUP.Alumno
