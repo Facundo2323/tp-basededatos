@@ -49,7 +49,12 @@ AS
 
 CREATE VIEW ausentismo_finales (porc_ausent, semestre, sede)
 AS
- SELECT (SELECT COUNT() / SELECT COUNT () * 100) AS porc_ausent, semestre, sede
+ SELECT 
+ (SELECT COUNT(*) 
+  FROM Evaluacion_final ef JOIN final JOIN curso JOIN Sedes_por_Curso
+  WHERE (ef.presente = 0) AND (fecha_fin <= semestre) AND ( curso.sede = sede) / 
+  SELECT COUNT(*) 
+  FROM Inscripcion_final WHERE (fecha_inscripcion_final ) * 100) AS porc_ausent, semestre, sede
  FROM
  GROUP BY semestre, sede
  ORDER BY semestre, sede
@@ -91,7 +96,7 @@ AS
 
 CREATE VIEW indice_satisfaccion (satisfaccion_anual, profesor_rango_etario, sede)
 AS
- SELECT ( ((%satisfechos - %insatisfechos) +100)/2) AS satisfaccion_anual
+ SELECT ( ((SELECT SUM(nota) FROM Encuesta e JOIN curso c ON (e.encuesta_curso = c.codigo_curso) WHERE (cumple condición rango etario) e.profesor)  - %insatisfechos) +100)/2) AS satisfaccion_anual
  FROM
  GROUP BY profesor_rango_etario, sede
  ORDER BY profesor_rango_etario, sede
