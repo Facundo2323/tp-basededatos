@@ -22,7 +22,7 @@ AS
 
 CREATE VIEW comp_desempeño (porc_aprobado, sede, año)
 AS
- SELECT (SUM()/SUM() * 100) AS porc_aprobado, sede, año
+ SELECT (SELECT SUM(*) FROM alumno a WHERE/SELECT SUM() FROM * 100) AS porc_aprobado, sede, año
  FROM 
  GROUP BY sede, año
  ORDER BY sede, año
