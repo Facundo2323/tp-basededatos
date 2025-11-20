@@ -11,56 +11,81 @@ AS SELECT ct.descripcion, t.descripcion
 
 --Tasa de rechazo de inscripciones:
 
-CREATE VIEW Tasa_Reachazos_Inscr (tasa_mes, sede)
+CREATE VIEW Tasa_Reachazos_Inscr (tasa_mes, mes, sede)
 AS
-SELECT (SUM(SELECT COUNT(*) FROM Inscripcion WHERE = sede )/SUM(SELECT COUNT(*) FROM ) * 100) AS promedio_mes,  
-AS sede 
-  FROM Inscripcion ins
+ SELECT (SUM(SELECT COUNT(*) FROM Inscripcion WHERE = sede )/SUM(SELECT COUNT(*) FROM ) * 100) AS promedio_mes, sede 
+ FROM Inscripcion ins
+ GROUP BY mes, sede
+ ORDER BY mes, sede
 
 --Comparación de desmpeño de cursada por sede:
 
-CREATE VIEW ()
+CREATE VIEW comp_desempeño (porc_aprobado, sede, año)
 AS
-SELECT FROM
+ SELECT (SUM()/SUM() * 100) AS porc_aprobado, sede, año
+ FROM 
+ GROUP BY sede, año
+ ORDER BY sede, año
 
 --Tiempo promedio de finalización de curso:
 
-CREATE VIEW ()
+CREATE VIEW promedio_finalizacion_curso(prom_tiempo, curso, año)
 AS
-SELECT FROM
+ SELECT (SUM(SELECT - SELECT)/SELECT COUNT(*)) AS prom_tiempo, curso, año
+ FROM 
+ GROUP BY curso, año
+ ORDER BY curso, año
 
 --Nota promedio de finales:
 
-CREATE VIEW ()
+CREATE VIEW promedio_finales (prom_notas, alumno_rango_etario, Curso_Categoria)
 AS
-SELECT FROM
+ SELECT (SELECT SUM() /SELECT COUNT()) AS prom_notas, alumno_rango_etario, Curso_Categoria
+ FROM
+ GROUP BY alumno_rango_etario, Curso_Categoria
+ ORDER BY alumno_rango_etario, Curso_Categoria
 
 --Tasa de ausentismo finales:
 
-CREATE VIEW ()
+CREATE VIEW ausentismo_finales (porc_ausent, semestre, sede)
 AS
-SELECT FROM
+ SELECT (SELECT COUNT() / SELECT COUNT () * 100) AS porc_ausent, semestre, sede
+ FROM
+ GROUP BY semestre, sede
+ ORDER BY semestre, sede
 
 --Desvío de pagos:
 
-CREATE VIEW ()
+CREATE VIEW Desvio_pagos(porc_pagos, semestre)
 AS
-SELECT FROM
+ SELECT ( SELECT COUNT(*) / SELECT COUNT(*) * 100) AS porc_pagos, semestre
+ FROM
+ GROUP BY semestre
+ ORDER BY semestre
 
 --Tasa de Morosidad Financiera mensual:
 
-CREATE VIEW ()
+CREATE VIEW Morosidad_financiera_mensual (Tasa_Morosidad, monto_adeudado, mes)
 AS
-SELECT FROM
+ SELECT (SELECT COUNT(*)/ SELECT SUM(*)) AS Tasa_Morosidad, monto_adeudado, mes
+ FROM
+ GROUP BY mes
+ ORDER BY mes
 
 --Ingresos por categoría de cursos:
 
-CREATE VIEW ()
+CREATE VIEW ingresos_categoría_cursos (categoria_curso, ingresos, sede, año)
 AS
-SELECT FROM
+ SELECT TOP 3 categoria_curso, (SELECT SUM(*)) ingresos, sede, año
+ FROM
+ GROUP BY
+ ORDER BY categoria_curso, año, sede
 
 --Índice de satisfacción:
 
-CREATE VIEW ()
+CREATE VIEW indice_satisfaccion (satisfaccion_anual, profesor_rango_etario, sede)
 AS
-SELECT FROM
+ SELECT ( ((%satisfechos - %insatisfechos) +100)/2) AS satisfaccion_anual
+ FROM
+ GROUP BY profesor_rango_etario, sede
+ ORDER BY profesor_rango_etario, sede
