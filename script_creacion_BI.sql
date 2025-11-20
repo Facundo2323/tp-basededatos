@@ -102,10 +102,16 @@ AS
 
 CREATE VIEW Desvio_pagos(porc_pagos, semestre)
 AS
- SELECT ( SELECT COUNT(*) / SELECT COUNT(*) * 100) AS porc_pagos, semestre
- FROM
+ SELECT ((COUNT(*)/ SELECT COUNT(*) FROM pago) * 100) AS porc_pagos,
+  semestre = CASE fecha_pago --supondré que por semestre se refiere a CUANDO fue pagado y no CUANDO expiró.
+  WHEN (acortar a mes comparativo) THEN 'primer semestre'
+  ELSE 'segundo semestre'
+ FROM pago p JOIN factura f ON (p.factura_numero = f.factura_numero)
+ WHERE (p.fecha_pago > f.Factura_FechaVencimiento)
  GROUP BY semestre
  ORDER BY semestre
+
+-- el COUNT(*) FROM pago trae de TODOS los pagos, no los casos mensuales específicamente.
 
 --Tasa de Morosidad Financiera mensual:
 
