@@ -1,6 +1,50 @@
 USE GD2C2025
 GO
 
+-- Dimensiones
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Tiempo')
+CREATE TABLE KEY_GROUP.BI_DIM_Tiempo (
+    DIM_Tiempo_id INT IDENTITY(1,1) PRIMARY KEY,
+    Anio INT,
+    Cuatrimestre INT,
+    Mes INT
+);
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Sede')
+CREATE TABLE KEY_GROUP.BI_DIM_Sede (
+    DIM_Sede_id INT IDENTITY(1,1) PRIMARY KEY, 
+    Nombre NVARCHAR(255) NOT NULL UNIQUE,
+);
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Rango_Etario_Alumno')
+CREATE TABLE KEY_GROUP.BI_DIM_Rango_Etario_Alumno (
+    DIM_Rango_Etario_Alumno_id INT IDENTITY(1,1) PRIMARY KEY, 
+    Descripcion NVARCHAR(255) NOT NULL UNIQUE, -- menor de 25, de 25 a 35, etc.
+    Edad_desde INT NULL, 
+    Edad_hasta INT NULL  
+);
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Rango_Etario_Profesor')
+CREATE TABLE KEY_GROUP.BI_DIM_Rango_Etario_Profesor (
+    DIM_Rango_Etario_Profesor_id INT IDENTITY(1,1) PRIMARY KEY, 
+    Descripcion NVARCHAR(255) NOT NULL UNIQUE, -- menor de 25, de 25 a 35, etc.
+    Edad_desde INT NULL, 
+    Edad_hasta INT NULL  
+);
+
+
+
+
+
+
+
+
+
 --Categorías y Turnos más solicitados:
 CREATE VIEW Categorias_Turnos
     (categoría, turno)
