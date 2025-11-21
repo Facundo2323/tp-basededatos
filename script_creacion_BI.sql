@@ -253,7 +253,11 @@ AS  SELECT ct.descripcion AS [Categoria],
         JOIN KEY_GROUP.Evaluacion_Final ef ON f.id_final = ef.id_final
         WHERE ef.nota >= 4
         GROUP BY ct.descripcion, YEAR(cr.fecha_inicio);
+<<<<<<< HEAD
 GO
+=======
+
+>>>>>>> 619480a13c839cfa5ce15a101c29cc82b782870c
 --5 Nota promedio de finales:
 CREATE VIEW promedio_finales 
     (Rango_Etario_Alumnos, Categoria_Cursos, Nota_Promedio)

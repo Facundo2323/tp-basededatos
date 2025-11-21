@@ -132,17 +132,6 @@ CREATE TABLE KEY_GROUP.Pregunta (
     CONSTRAINT FK_Pregunta_encuesta FOREIGN KEY (id_encuesta) REFERENCES KEY_GROUP.Encuesta(id_encuesta)
 );
 
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Detalle_Factura' AND schema_id = SCHEMA_ID('KEY_GROUP'))
-CREATE TABLE KEY_GROUP.Detalle_Factura (
-    id_detalle_factura BIGINT IDENTITY(1,1),
-    codigo_curso BIGINT,
-    periodo VARCHAR(255), --mes/año
-    importe DECIMAL(18,2),
-
-    CONSTRAINT PK_Detalle_Factura_id PRIMARY KEY (id_detalle_factura),
-    CONSTRAINT FK_Detalle_Factura_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso)
-);
-
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Alumno' AND schema_id = SCHEMA_ID('KEY_GROUP'))
 CREATE TABLE KEY_GROUP.Alumno (
     legajo_alumno BIGINT,
@@ -165,12 +154,23 @@ CREATE TABLE KEY_GROUP.Factura (
     fecha_emision DATETIME2(6),
     fecha_vencimiento DATETIME2(6),
     importe_total DECIMAL(18,2),
-    id_detalle_factura BIGINT,
     legajo_alumno BIGINT,
 
     CONSTRAINT PK_Factura_id PRIMARY KEY (factura_numero),
-    CONSTRAINT FK_Factura_detalle FOREIGN KEY (id_detalle_factura) REFERENCES KEY_GROUP.Detalle_Factura(id_detalle_factura),
     CONSTRAINT FK_Factura_alumno FOREIGN KEY (legajo_alumno) REFERENCES KEY_GROUP.Alumno(legajo_alumno)
+);
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Detalle_Factura' AND schema_id = SCHEMA_ID('KEY_GROUP'))
+CREATE TABLE KEY_GROUP.Detalle_Factura (
+    id_detalle_factura BIGINT IDENTITY(1,1),
+    codigo_curso BIGINT,
+    periodo VARCHAR(255), --mes/año
+    importe DECIMAL(18,2),
+    factura_numero  BIGINT,
+
+    CONSTRAINT PK_Detalle_Factura_id PRIMARY KEY (id_detalle_factura),
+    CONSTRAINT FK_Detalle_Factura_curso FOREIGN KEY (codigo_curso) REFERENCES KEY_GROUP.Curso(codigo_curso),
+    CONSTRAINT FK_Detalle_Factura_factura FOREIGN KEY (factura_numero) REFERENCES KEY_GROUP.Factura(factura_numero)
 );
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Medio_de_Pago' AND schema_id = SCHEMA_ID('KEY_GROUP'))
@@ -433,14 +433,13 @@ GO
 CREATE PROCEDURE KEY_GROUP.migrar_Curso 
 AS
     BEGIN
-        INSERT INTO KEY_GROUP.Curso (codigo_curso, nombre, descripcion, id_categoria, fecha_inicio, fecha_fin, id_sede, duracion_meses, tipo_turno, precio_mensual, id_profesor)
-            SELECT DISTINCT M.Curso_Codigo, M.Curso_Nombre, M.Curso_Descripcion, C.id_categoria, M.Curso_FechaInicio, M.Curso_FechaFin, M.Curso_DuracionMeses, T.tipo_turno, M.Curso_PrecioMensual
+        INSERT INTO KEY_GROUP.Curso (codigo_curso, nombre, descripcion, id_categoria, fecha_inicio, fecha_fin, duracion_meses, tipo_turno, precio_mensual, id_profesor)
+            SELECT DISTINCT M.Curso_Codigo, M.Curso_Nombre, M.Curso_Descripcion, C.id_categoria, M.Curso_FechaInicio, M.Curso_FechaFin, M.Curso_DuracionMeses, T.tipo_turno, M.Curso_PrecioMensual, P.id_profesor
             FROM gd_esquema.Maestra M
 
             JOIN KEY_GROUP.Categoria C ON C.descripcion = M.Curso_Categoria
             JOIN KEY_GROUP.Turno T ON T.descripcion = M.Curso_Turno
             JOIN KEY_GROUP.Profesor P ON P.dni = M.Profesor_Dni
-            JOIN KEY_GROUP.Sede S ON S.nombre = M.Sede_Nombre
             ORDER BY 1
     END
 GO
@@ -501,19 +500,6 @@ AS
     END
 GO
 
-CREATE PROCEDURE KEY_GROUP.migrar_Detalle_factura
-AS
-    BEGIN
-        INSERT INTO KEY_GROUP.Detalle_factura (periodo, importe, codigo_curso)
-            SELECT FORMAT(Factura_FechaEmision, 'MM/yyyy') AS periodo, M.Detalle_Factura_Importe, C.codigo_curso
-            FROM gd_esquema.Maestra M
-
-            JOIN KEY_GROUP.Curso C ON M.Curso_Codigo = C.codigo_curso
-
-            WHERE M.Detalle_Factura_Importe IS NOT NULL
-    END
-GO
-
 CREATE PROCEDURE KEY_GROUP.migrar_Alumno
 AS
     BEGIN 
@@ -530,12 +516,28 @@ GO
 CREATE PROCEDURE KEY_GROUP.migrar_Factura
 AS
     BEGIN --cambié el identity de id_factura por el atributo factura_numero de la tabla Maestra
-        INSERT INTO KEY_GROUP.Factura (factura_numero, fecha_emision, fecha_vencimiento, importe_total, id_detalle_factura, legajo_alumno)
-            SELECT DISTINCT M.Factura_Numero, M.Factura_FechaEmision, M.Factura_FechaVencimiento, M.Factura_Total, D.id_detalle_factura, A.legajo_alumno
+        INSERT INTO KEY_GROUP.Factura (factura_numero, fecha_emision, fecha_vencimiento, importe_total, legajo_alumno)
+            SELECT DISTINCT M.Factura_Numero, M.Factura_FechaEmision, M.Factura_FechaVencimiento, M.Factura_Total, A.legajo_alumno
             FROM gd_esquema.Maestra M
 
-            JOIN KEY_GROUP.Detalle_Factura D ON D.importe = M.Detalle_Factura_Importe
             JOIN KEY_GROUP.Alumno A ON M.Alumno_Legajo = A.legajo_alumno
+
+            WHERE M.Factura_Numero IS NOT NULL
+            ORDER BY 1
+    END
+GO
+
+CREATE PROCEDURE KEY_GROUP.migrar_Detalle_factura
+AS
+    BEGIN
+        INSERT INTO KEY_GROUP.Detalle_factura (periodo, importe, codigo_curso, factura_numero)
+            SELECT FORMAT(Factura_FechaEmision, 'MM/yyyy') AS periodo, M.Detalle_Factura_Importe, C.codigo_curso, F.factura_numero
+            FROM gd_esquema.Maestra M
+
+            JOIN KEY_GROUP.Factura F ON M.Factura_Numero = F.factura_numero
+            JOIN KEY_GROUP.Curso C ON M.Curso_Codigo = C.codigo_curso
+
+            WHERE M.Detalle_Factura_Importe IS NOT NULL
     END
 GO
 
@@ -648,9 +650,14 @@ GO
 CREATE PROCEDURE KEY_GROUP.migrar_Evaluacion 
 AS
     BEGIN
-        INSERT INTO KEY_GROUP.Evaluacion (fecha_evaluacion, nota, presente, instancia)
-            SELECT Evaluacion_Curso_fechaEvaluacion, Evaluacion_Curso_Nota, Evaluacion_Curso_Presente, Evaluacion_Curso_Instancia
-            FROM gd_esquema.Maestra
+        INSERT INTO KEY_GROUP.Evaluacion (fecha_evaluacion, nota, presente, instancia, codigo_curso, id_modulo, legajo_alumno)
+            SELECT Evaluacion_Curso_fechaEvaluacion, Evaluacion_Curso_Nota, Evaluacion_Curso_Presente, Evaluacion_Curso_Instancia, C.codigo_curso, Md.id_modulo, A.legajo_alumno
+            FROM gd_esquema.Maestra M
+
+            JOIN KEY_GROUP.Curso C ON C.codigo_curso = M.Curso_Codigo
+            JOIN KEY_GROUP.Modulo Md ON Md.nombre = M.Modulo_Nombre
+            JOIN KEY_GROUP.Alumno A ON A.legajo_alumno = M.Alumno_Legajo
+
             WHERE Evaluacion_Curso_fechaEvaluacion IS NOT NULL
     END
 GO
@@ -676,7 +683,7 @@ AS
             SELECT DISTINCT Inscripcion_Final_Nro, Inscripcion_Final_Fecha, A.legajo_alumno, F.id_final
             FROM gd_esquema.Maestra M
 
-            JOIN KEY_GROUP.Final F ON M.Examen_Final_Fecha = F.fecha_final AND M.Examen_Final_Hora = F.hora
+            JOIN KEY_GROUP.Final F ON M.Examen_Final_Fecha = F.fecha_final AND M.Curso_Codigo = F.codigo_curso
             JOIN KEY_GROUP.Alumno A ON M.Alumno_Legajo = A.legajo_alumno
 
             WHERE Inscripcion_Final_Nro IS NOT NULL
@@ -756,7 +763,7 @@ CREATE NONCLUSTERED INDEX IX_Encuesta_curso ON KEY_GROUP.Encuesta(codigo_curso);
 CREATE NONCLUSTERED INDEX IX_Pregunta_encuesta ON KEY_GROUP.Pregunta(id_encuesta);
 CREATE NONCLUSTERED INDEX IX_Detalle_Factura_curso ON KEY_GROUP.Detalle_Factura(codigo_curso);
 CREATE NONCLUSTERED INDEX IX_Alumno_localidad ON KEY_GROUP.Alumno(id_localidad);
-CREATE NONCLUSTERED INDEX IX_Factura_detalle ON KEY_GROUP.Factura(id_detalle_factura);
+CREATE NONCLUSTERED INDEX IX_Detalle_Factura_factura ON KEY_GROUP.Detalle_Factura(factura_numero);
 CREATE NONCLUSTERED INDEX IX_Factura_alumno ON KEY_GROUP.Factura(legajo_alumno);
 CREATE NONCLUSTERED INDEX IX_Pago_factura ON KEY_GROUP.Pago(factura_numero);
 CREATE NONCLUSTERED INDEX IX_Pago_medio_pago ON KEY_GROUP.Pago(codigo_medio_de_pago);
@@ -788,20 +795,20 @@ BEGIN TRANSACTION
     EXECUTE KEY_GROUP.migrar_Turno
     EXECUTE KEY_GROUP.migrar_Curso
     EXECUTE KEY_GROUP.migrar_Sedes_por_Curso
-    EXECUTE KEY_GROUP.migrar_Encuesta--
+    EXECUTE KEY_GROUP.migrar_Encuesta
     EXECUTE KEY_GROUP.migrar_Pregunta
-    EXECUTE KEY_GROUP.migrar_Detalle_factura--
     EXECUTE KEY_GROUP.migrar_Alumno
     EXECUTE KEY_GROUP.migrar_Factura
-    EXECUTE KEY_GROUP.migrar_Medio_de_pago--
+    EXECUTE KEY_GROUP.migrar_Detalle_factura
+    EXECUTE KEY_GROUP.migrar_Medio_de_pago
     EXECUTE KEY_GROUP.migrar_Pago
-    EXECUTE KEY_GROUP.migrar_Estado_inscripcion--
-    EXECUTE KEY_GROUP.migrar_Inscripcion--
-    EXECUTE KEY_GROUP.migrar_Dia--
-    EXECUTE KEY_GROUP.migrar_Curso_por_dia--
+    EXECUTE KEY_GROUP.migrar_Estado_inscripcion
+    EXECUTE KEY_GROUP.migrar_Inscripcion
+    EXECUTE KEY_GROUP.migrar_Dia
+    EXECUTE KEY_GROUP.migrar_Curso_por_dia
     EXECUTE KEY_GROUP.migrar_Modulo
-    EXECUTE KEY_GROUP.migrar_Modulo_por_Curso--
-    EXECUTE KEY_GROUP.migrar_Trabajo_practico--
+    EXECUTE KEY_GROUP.migrar_Modulo_por_Curso
+    EXECUTE KEY_GROUP.migrar_Trabajo_practico
     EXECUTE KEY_GROUP.migrar_Evaluacion
     EXECUTE KEY_GROUP.migrar_Final
     EXECUTE KEY_GROUP.migrar_Inscripcion_final

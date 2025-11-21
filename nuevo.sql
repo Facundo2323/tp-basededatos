@@ -521,7 +521,7 @@ GO
 
 CREATE PROCEDURE KEY_GROUP.migrar_Factura
 AS
-    BEGIN --cambié el identity de factura_numero por el atributo factura_numero de la tabla Maestra
+    BEGIN
         INSERT INTO KEY_GROUP.Factura (factura_numero, fecha_emision, fecha_vencimiento, importe_total, id_detalle_factura, legajo_alumno)
             SELECT DISTINCT M.Factura_Numero, M.Factura_FechaEmision, M.Factura_FechaVencimiento, M.Factura_Total, D.id_detalle_factura, M.Alumno_Legajo
             FROM gd_esquema.Maestra M
@@ -547,7 +547,7 @@ AS
             SELECT M.Pago_Fecha, F.factura_numero, MP.codigo_medio_de_pago, M.Pago_Importe
             FROM gd_esquema.Maestra M 
                 JOIN KEY_GROUP.Medio_de_pago MP ON MP.codigo_medio_de_pago = M.Pago_MedioPago
-                JOIN KEY_GROUP.Factura F ON F.factura_numero = M.Factura_Numero -- chequear esto despues, factura_numero no es lo mismo que factura_numero
+                JOIN KEY_GROUP.Factura F ON F.factura_numero = M.Factura_Numero 
             WHERE M.Pago_Fecha IS NOT NULL AND M.Pago_Importe IS NOT NULL
     END
 GO
