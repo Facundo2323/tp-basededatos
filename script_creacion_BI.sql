@@ -80,12 +80,12 @@ AS SELECT ct.descripcion, t.descripcion
     JOIN categorias ct  ON cr.id_categoria = ct.id_categoria
     JOIN turnos t       ON cr.tipo_turno = t.tipo_turno
 
---Tasa de rechazo de inscripciones:
+--Tasa de rechazo de inscripciones: HECHO! Sin dimensión. Falta probar
 
 CREATE VIEW Tasa_Rechazos_Inscr (tasa_mes, mes, sede)
 AS
- SELECT (SUM(SELECT COUNT(*) FROM Inscripcion WHERE = sede )/SUM(SELECT COUNT(*) FROM ) * 100) AS promedio_mes, sede 
- FROM Inscripcion ins
+ SELECT ((SUM(SELECT COUNT(*) FROM Inscripcion i2 WHERE i2.sede = i1.sede AND MONTH(i2.fecha_respuesta) = mes AND i2.cod_estado = 'rechazado')/SUM(SELECT COUNT(*) FROM Inscripcion i3 WHERE i3.sede = i1.sede AND MONTH(i3.fecha_respuesta) = mes)) * 100) AS promedio_mes, MONTH(i1.fecha_respuesta) AS mes, sede 
+ FROM Inscripcion i1
  GROUP BY mes, sede
  ORDER BY mes, sede
 
@@ -111,7 +111,7 @@ AS
 
 CREATE VIEW promedio_finales (prom_notas, alumno_rango_etario, Curso_Categoria)
 AS
- SELECT (SELECT SUM() /SELECT COUNT()) AS prom_notas, alumno_rango_etario, Curso_Categoria
+ SELECT (SELECT SUM(ef.nota) from Evaluacion_final ef WHERE /SELECT COUNT()) AS prom_notas, alumno_rango_etario, Curso_Categoria
  FROM
  GROUP BY alumno_rango_etario, Curso_Categoria
  ORDER BY alumno_rango_etario, Curso_Categoria
@@ -130,13 +130,13 @@ AS
  GROUP BY semestre, sede
  ORDER BY semestre, sede
 
---Desvío de pagos:
+--Desvío de pagos: HECHO! falta probar
 
 CREATE VIEW Desvio_pagos(porc_pagos, semestre)
 AS
- SELECT ((COUNT(*)/ SELECT COUNT(*) FROM pago) * 100) AS porc_pagos,
-  semestre = CASE fecha_pago --supondré que por semestre se refiere a CUANDO fue pagado y no CUANDO expiró.
-  WHEN (acortar a mes comparativo) THEN 'primer semestre'
+ SELECT ((COUNT(*)/ SELECT COUNT(*) FROM pago p2 WHERE (CASE MONTH(p2.fecha_pago) WHEN <6 THEN 'primer semestre' ELSE 'segundo semestre' = semestre)) * 100) AS porc_pagos,
+  semestre = CASE MONTH(fecha_pago) --supondré que por semestre se refiere a CUANDO fue pagado y no CUANDO expiró.
+  WHEN <6 THEN 'primer semestre'
   ELSE 'segundo semestre'
  FROM pago p JOIN factura f ON (p.factura_numero = f.factura_numero)
  WHERE (p.fecha_pago > f.Factura_FechaVencimiento)
