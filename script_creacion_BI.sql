@@ -63,7 +63,7 @@ CREATE TABLE KEY_GROUP.BI_DIM_Medio_de_pago (
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
                WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Bloques_de_satisfaccion')
 CREATE TABLE KEY_GROUP.BI_DIM_Bloques_de_satisfaccion (
-    DIM_Bloques_de_satisfaccion_id INT IDENTITY(1,1) PRIMARY KEY,
+    DIM_Bloque_sat_id INT IDENTITY(1,1) PRIMARY KEY,
     Descripcion NVARCHAR(255), --satisfechos, neutrales, insatisfechos
     NotaMinima INT, 
     NotaMaxima INT
@@ -92,7 +92,7 @@ CREATE TABLE KEY_GROUP.BI_HECHO_Inscripciones_a_cursos (
     ingresos_recaudados DECIMAL(38,2)
     
     PRIMARY KEY (DIM_Tiempo_id, DIM_Sede_id, DIM_Turno_curso_id, DIM_Categoria_curso_id),
-    FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id)
+    FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id),
     FOREIGN KEY (DIM_Sede_id) REFERENCES KEY_GROUP.BI_DIM_Sede(DIM_Sede_id),
     FOREIGN KEY (DIM_Turno_curso_id) REFERENCES KEY_GROUP.BI_DIM_Turno_curso(DIM_Turno_curso_id),
     FOREIGN KEY (DIM_Categoria_curso_id) REFERENCES KEY_GROUP.BI_DIM_Categoria_curso(DIM_Categoria_curso_id)
@@ -139,6 +139,7 @@ CREATE TABLE KEY_GROUP.BI_HECHO_Ev_finales (
     PRIMARY KEY (DIM_Tiempo_id, DIM_Sede_id, DIM_REA_id, DIM_Categoria_curso_id),
     FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id),
     FOREIGN KEY (DIM_Sede_id) REFERENCES KEY_GROUP.BI_DIM_Sede(DIM_Sede_id),
+    FOREIGN KEY (DIM_Categoria_curso_id) REFERENCES KEY_GROUP.BI_DIM_Categoria_curso(DIM_Categoria_curso_id),
     FOREIGN KEY (DIM_REA_id) REFERENCES KEY_GROUP.BI_DIM_Rango_etario_alumno(DIM_REA_id)
 
 );
@@ -153,7 +154,7 @@ CREATE TABLE KEY_GROUP.BI_HECHO_Pagos (
     
     PRIMARY KEY (DIM_Tiempo_id, DIM_Medio_de_pago_id, DIM_Factura_id),
     FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id),
-    FOREIGN KEY (DIM_Sede_id) REFERENCES KEY_GROUP.BI_DIM_Sede(DIM_Sede_id),
+    FOREIGN KEY (DIM_Medio_de_pago_id) REFERENCES KEY_GROUP.BI_DIM_Medio_de_pago(DIM_Medio_de_pago_id),
     FOREIGN KEY (DIM_Factura_id) REFERENCES KEY_GROUP.BI_DIM_Factura(DIM_Factura_id)
 
 );
@@ -172,7 +173,7 @@ CREATE TABLE KEY_GROUP.BI_HECHO_Encuestas (
     FOREIGN KEY (DIM_REP_id) REFERENCES KEY_GROUP.BI_DIM_Rango_etario_profesor(DIM_REP_id),
     FOREIGN KEY (DIM_Bloque_sat_id) REFERENCES KEY_GROUP.BI_DIM_Bloques_de_satisfaccion(DIM_Bloque_sat_id)
 );
-
+GO
 --1 Categorías y Turnos más solicitados:
 CREATE VIEW Categorias_Turnos
     (Categoria_Cursos, Turno_Cursos, Anio_Cursos, Sede_Cursos, Cantidad)
@@ -188,7 +189,6 @@ AS SELECT TOP 3 ct.descripcion AS           [Categoria],
         JOIN KEY_GROUP.Sedes_por_Curso sc ON sc.codigo_curso = cr.codigo_curso
         JOIN KEY_GROUP.Sede s ON sc.id_sede = s.id_sede
         GROUP BY YEAR(i.fecha_inscripcion), ct.descripcion, t.descripcion, s.nombre
-        ORDER BY COUNT(*) DESC;
 GO
 --2 Tasa de rechazo de inscripciones:
 CREATE VIEW Tasa_Rechazos_Inscr
@@ -208,7 +208,6 @@ AS SELECT t.mes AS      [Mes],
         JOIN KEY_GROUP.BI_DIM_Tiempo t ON MONTH(i.fecha_inscripcion) = t.mes AND YEAR(i.fecha_inscripcion) = t.anio
         WHERE i.codigo_estado_inscripcion = 'Rechazada'
         GROUP BY t.mes, s.id_sede
-        ORDER BY [Porcentaje Aprobacion] DESC;
 GO
 --3 Comparación de desmpeño de cursada por sede:
 CREATE VIEW comp_desempeño 
@@ -239,7 +238,6 @@ AS SELECT T.Sede,
 
             GROUP BY cr.codigo_curso, s.nombre, YEAR(cr.fecha_inicio), A.legajo_alumno) AS T
     GROUP BY T.Sede, T.Anio
-    ORDER BY [Tasa Aprobacion] DESC;
 GO
 --4 Tiempo promedio de finalización de curso:
 CREATE VIEW promedio_finalizacion_curso
@@ -253,11 +251,7 @@ AS  SELECT ct.descripcion AS [Categoria],
         JOIN KEY_GROUP.Evaluacion_Final ef ON f.id_final = ef.id_final
         WHERE ef.nota >= 4
         GROUP BY ct.descripcion, YEAR(cr.fecha_inicio);
-<<<<<<< HEAD
 GO
-=======
-
->>>>>>> 619480a13c839cfa5ce15a101c29cc82b782870c
 --5 Nota promedio de finales:
 CREATE VIEW promedio_finales 
     (Rango_Etario_Alumnos, Categoria_Cursos, Nota_Promedio)
@@ -336,7 +330,6 @@ AS  SELECT TOP 3 ct.descripcion AS      [Categoria],
         JOIN KEY_GROUP.Factura f ON df.factura_numero = f.factura_numero
         JOIN KEY_GROUP.Pago p ON f.factura_numero = p.factura_numero
         GROUP BY ct.descripcion, s.nombre, YEAR(f.fecha_emision)
-        ORDER BY 3 DESC
 GO
 --10 Índice de satisfacción:
 CREATE VIEW indice_satisfaccion 
