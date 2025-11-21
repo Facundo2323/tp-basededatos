@@ -1,6 +1,77 @@
 USE GD2C2025
 GO
 
+-- Dimensiones
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Tiempo')
+CREATE TABLE KEY_GROUP.BI_DIM_Tiempo (
+    DIM_Tiempo_id INT IDENTITY(1,1) PRIMARY KEY,
+    Anio INT,
+    Cuatrimestre INT,
+    Mes INT
+);
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Sede')
+CREATE TABLE KEY_GROUP.BI_DIM_Sede (
+    DIM_Sede_id INT IDENTITY(1,1) PRIMARY KEY, 
+    Nombre NVARCHAR(255) UNIQUE,
+);
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Rango_Etario_Alumno')
+CREATE TABLE KEY_GROUP.BI_DIM_Rango_Etario_Alumno (
+    DIM_REA_id INT IDENTITY(1,1) PRIMARY KEY, 
+    Descripcion NVARCHAR(255) UNIQUE, -- menor de 25, de 25 a 35, etc.
+    Edad_desde INT, 
+    Edad_hasta INT  
+);
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Rango_Etario_Profesor')
+CREATE TABLE KEY_GROUP.BI_DIM_Rango_Etario_Profesor (
+    DIM_REP_id INT IDENTITY(1,1) PRIMARY KEY, 
+    Descripcion NVARCHAR(255), -- menor de 25, de 25 a 35, etc.
+    Edad_desde INT, 
+    Edad_hasta INT
+);
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Turno_Curso')
+CREATE TABLE KEY_GROUP.BI_DIM_Turno_Curso (
+    DIM_Turno_Curso_id INT IDENTITY(1,1) PRIMARY KEY, 
+    Turno NVARCHAR(255)  --Mañ/Tar/Noc
+);
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Categoria_Curso')
+CREATE TABLE KEY_GROUP.BI_DIM_Categoria_Curso (
+    DIM_Categoria_Curso_id INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre NVARCHAR(255)
+);
+
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Medio_de_pago')
+CREATE TABLE KEY_GROUP.BI_DIM_Medio_de_pago (
+    DIM_Medio_de_pago_id INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre NVARCHAR(255)
+);
+
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_DIM_Bloques_de_satisfaccion')
+CREATE TABLE KEY_GROUP.BI_DIM_Bloques_de_satisfaccion (
+    DIM_Bloques_de_satisfaccion_id INT IDENTITY(1,1) PRIMARY KEY,
+    Descripcion NVARCHAR(255), --satisfechos, neutrales, insatisfechos
+    NotaMinima INT, 
+    NotaMaxima INT
+);
+
+
+
+
 --Categorías y Turnos más solicitados:
 CREATE VIEW Categorias_Turnos
     (categoría, turno)
@@ -11,7 +82,7 @@ AS SELECT ct.descripcion, t.descripcion
 
 --Tasa de rechazo de inscripciones:
 
-CREATE VIEW Tasa_Reachazos_Inscr (tasa_mes, mes, sede)
+CREATE VIEW Tasa_Rechazos_Inscr (tasa_mes, mes, sede)
 AS
  SELECT (SUM(SELECT COUNT(*) FROM Inscripcion WHERE = sede )/SUM(SELECT COUNT(*) FROM ) * 100) AS promedio_mes, sede 
  FROM Inscripcion ins
