@@ -274,7 +274,7 @@ AS SELECT t.mes AS      [Mes],
         JOIN KEY_GROUP.Sede s ON sc.id_sede = s.id_sede
         JOIN KEY_GROUP.BI_DIM_Tiempo t ON MONTH(i.fecha_inscripcion) = t.mes AND YEAR(i.fecha_inscripcion) = t.anio
         WHERE i.codigo_estado_inscripcion = 'Rechazada'
-        GROUP BY t.mes, s.id_sede
+        GROUP BY t.mes, s.nombre, s.id_sede
 GO
 --3 Comparación de desmpeño de cursada por sede:
 CREATE VIEW comp_desempeño 
@@ -344,7 +344,7 @@ AS SELECT T.Sede,
                 t.Semestre AS       [Semestre],
                 t.Anio AS           [Anio],
                 COUNT(*) AS         [Total],
-                SUM(ef.presente) AS [Presentes]
+                SUM(CAST(ef.presente AS INT) AS [Presentes]
             FROM KEY_GROUP.Evaluacion_Final ef
             JOIN KEY_GROUP.Final f ON ef.id_final = f.id_final
             JOIN KEY_GROUP.Curso cr ON f.codigo_curso = cr.codigo_curso
