@@ -195,71 +195,47 @@ ORDER BY id_sede
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_alumno)
 INSERT INTO KEY_GROUP.BI_DIM_Rango_etario_alumno
 
-SELECT
-FROM JOIN ON
-WHERE
-GROUP BY
-ORDER BY
+VALUES ('menor de 25', 0, 25),('de 25 a 35', 25, 35),('de 35 a 50', 35, 50),('mayor de 50', 50, 120)
 ;
 
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_profesor)
 INSERT INTO KEY_GROUP.BI_DIM_Rango_etario_profesor
 
-SELECT
-FROM JOIN ON
-WHERE
-GROUP BY
-ORDER BY
+VALUES ('menor de 25', 0, 25),('de 25 a 35', 25, 35),('de 35 a 50', 35, 50),('mayor de 50', 50, 120)
 ;
 
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Turno_curso)
 INSERT INTO KEY_GROUP.BI_DIM_Turno_curso
 
-SELECT
-FROM JOIN ON
-WHERE
-GROUP BY
-ORDER BY
+VALUES ('mañana'),('tarde'),('noche')
 ;
 
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Categoria_curso)
 INSERT INTO KEY_GROUP.BI_DIM_Categoria_curso
 
-SELECT
-FROM JOIN ON
-WHERE
-GROUP BY
-ORDER BY
+SELECT descripcion
+FROM KEY_GROUP.Sede
+ORDER BY id_categoria
 ;
 
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Medio_de_pago)
 INSERT INTO KEY_GROUP.BI_DIM_Medio_de_pago
 
-SELECT
-FROM JOIN ON
-WHERE
-GROUP BY
-ORDER BY
+SELECT codigo_medio_de_pago
+FROM KEY_GROUP.Medio_de_Pago
+ORDER BY codigo_medio_de_pago
 ;
 
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Bloques_de_satisfaccion)
 INSERT INTO KEY_GROUP.BI_DIM_Bloques_de_satisfaccion
 
-SELECT
-FROM JOIN ON
-WHERE
-GROUP BY
-ORDER BY
+VALUES ('satisfecho',7,10),('neutral',5,6),('insatisfecho',1,4)
 ;
 
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Factura)
 INSERT INTO KEY_GROUP.BI_DIM_Factura
 
-SELECT
-FROM JOIN ON
-WHERE
-GROUP BY
-ORDER BY
+VALUES ('pendiente'),('pagado'),('atrasado')
 ;
 
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_HECHO_Inscripciones_a_cursos)
