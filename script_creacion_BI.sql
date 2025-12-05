@@ -79,10 +79,18 @@ CREATE TABLE KEY_GROUP.BI_DIM_Factura (
 -- VOLCADO ESQUEMA-BI DIMENSIONES
 
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo)
+DECLARE @inicio datetime --usar un cursor de tabla sería redundante, porque necesitamos una tabla con las fechas ya puestas.
+DECLARE @final datetime
+DECLARE @cursor datetime
+SET @inicio = '1990-01-01'
+SET @final = '2099-12-31'
+SET @cursor = @inicio
+WHILE @cursor <= @final
+BEGIN
 INSERT INTO KEY_GROUP.BI_DIM_Tiempo
-
-SELECT anio, (CASE WHEN mes BETWEEN 1 AND 6 THEN 1 WHEN BETWEEN 7 AND 12 THEN 2) AS Semestre, generate_series(1,12) AS mes
-FROM generate_series(1961,2100) AS anio
+VALUES (year(@cursor), CASE WHEN Month(@cursor) BETWEEN 1 AND 6 THEN 1 ELSE 2 END, Month(@cursor)) 
+SET @cursor = DateAdd(m, 1, @cursor)
+END
 ;
 
 IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Sede)
