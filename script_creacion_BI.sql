@@ -353,7 +353,7 @@ AS SELECT T.Sede,
             JOIN KEY_GROUP.Sedes_por_Curso sc ON sc.codigo_curso = cr.codigo_curso
             JOIN KEY_GROUP.Sede s ON sc.id_sede = s.id_sede
             JOIN KEY_GROUP.BI_DIM_Tiempo t ON MONTH(f.fecha_final) = t.Mes AND YEAR(f.fecha_final) = t.Anio
-            GROUP BY s.nombre, t.Semestre, t.Anio) T
+            GROUP BY s.nombre, t.Semestre, t.Anio
 GO
 --7 Desvío de pagos:
 CREATE VIEW Desvio_pagos
