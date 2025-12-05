@@ -111,71 +111,76 @@ FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
       SELECT * FROM KEY_GROUP.BI_DIM_Sede) AS Evaluaciones
 GROUP BY DIM_Tiempo_id, DIM_Sede_id
 
-ALTER KEY_GROUP.BI_HECHO_Evaluaciones  
+ALTER TABLE KEY_GROUP.BI_HECHO_Evaluaciones  
       ADD pct_aprobacion_cursada DECIMAL(38,2)
 ;
 
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_HECHO_Inscripciones_a_finales')
-CREATE TABLE KEY_GROUP.BI_HECHO_Inscripciones_a_finales (
-    DIM_Tiempo_id INT,
-    DIM_Sede_id INT,
-    cantidad_inscriptos INT
-    
-    PRIMARY KEY (DIM_Tiempo_id, DIM_Sede_id),
-    FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id),
-    FOREIGN KEY (DIM_Sede_id) REFERENCES KEY_GROUP.BI_DIM_Sede(DIM_Sede_id)
 
-);
+SELECT DIM_Tiempo_id, DIM_Sede_id
+INTO KEY_GROUP.BI_HECHO_Inscripciones_a_finales
+FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
+      UNION 
+      SELECT * FROM KEY_GROUP.BI_DIM_Sede) AS InscripcionesFinales
+GROUP BY DIM_Tiempo_id, DIM_Sede_id
+
+ALTER TABLE KEY_GROUP.BI_HECHO_Evaluaciones  
+      ADD cantidad_inscriptos INT
+;
 
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_HECHO_Ev_finales')
-CREATE TABLE KEY_GROUP.BI_HECHO_Ev_finales (
-    DIM_Tiempo_id INT,
-    DIM_Sede_id INT,
-    DIM_REA_id INT, 
-    DIM_Categoria_curso_id INT, 
-    promedio_finalizacion_curso DECIMAL(38,2), 
-    promedio_notas_finales DECIMAL(38,2),
-    pct_ausentes DECIMAL(38,2)
-    
-    PRIMARY KEY (DIM_Tiempo_id, DIM_Sede_id, DIM_REA_id, DIM_Categoria_curso_id),
-    FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id),
-    FOREIGN KEY (DIM_Sede_id) REFERENCES KEY_GROUP.BI_DIM_Sede(DIM_Sede_id),
-    FOREIGN KEY (DIM_Categoria_curso_id) REFERENCES KEY_GROUP.BI_DIM_Categoria_curso(DIM_Categoria_curso_id),
-    FOREIGN KEY (DIM_REA_id) REFERENCES KEY_GROUP.BI_DIM_Rango_etario_alumno(DIM_REA_id)
 
-);
+SELECT DIM_Tiempo_id, DIM_Sede_id, DIM_REA_id,  DIM_Categoria_curso_id
+INTO KEY_GROUP.BI_HECHO_Ev_finales
+FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
+      UNION 
+      SELECT * FROM KEY_GROUP.BI_DIM_Sede
+      UNION
+      SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_alumno
+      UNION
+      SELECT * FROM KEY_GROUP.BI_DIM_Categoria_curso) AS EvaluacionesFinales
+GROUP BY DIM_Tiempo_id, DIM_Sede_id, DIM_REA_id,  DIM_Categoria_curso_id
+
+ALTER TABLE KEY_GROUP.BI_HECHO_Ev_finales 
+      ADD promedio_finalizacion_curso DECIMAL(38,2), 
+          promedio_notas_finales DECIMAL(38,2),
+          pct_ausentes DECIMAL(38,2)
+;
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_HECHO_Pagos')
-CREATE TABLE KEY_GROUP.BI_HECHO_Pagos (
-    DIM_Tiempo_id INT,
-    DIM_Medio_de_pago_id INT,
-    DIM_Factura_id INT, 
-    pct_fuera_de_termino DECIMAL(38,2),
-    cantidad_importes_adeudados INT
-    
-    PRIMARY KEY (DIM_Tiempo_id, DIM_Medio_de_pago_id, DIM_Factura_id),
-    FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id),
-    FOREIGN KEY (DIM_Medio_de_pago_id) REFERENCES KEY_GROUP.BI_DIM_Medio_de_pago(DIM_Medio_de_pago_id),
-    FOREIGN KEY (DIM_Factura_id) REFERENCES KEY_GROUP.BI_DIM_Factura(DIM_Factura_id)
 
-);
+SELECT DIM_Tiempo_id, DIM_Medio_de_pago_id, DIM_Factura_id
+INTO KEY_GROUP.BI_HECHO_Pagos
+FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
+      UNION 
+      SELECT * FROM KEY_GROUP.BI_DIM_Medio_de_pago
+      UNION
+      SELECT * FROM KEY_GROUP.BI_DIM_Factura) AS Pagos
+GROUP BY DIM_Tiempo_id, DIM_Medio_de_pago_id, DIM_Factura_id
+
+ALTER TABLE KEY_GROUP.BI_HECHO_Ev_finales 
+      ADD  pct_fuera_de_termino DECIMAL(38,2),
+           cantidad_importes_adeudados INT
+;
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_HECHO_Encuestas')
-CREATE TABLE KEY_GROUP.BI_HECHO_Encuestas (
-    DIM_Tiempo_id INT,
-    DIM_Sede_id INT,
-    DIM_REP_id INT, 
-    DIM_Bloque_sat_id INT,
-    indice_sat_anual DECIMAL(38,2)
-    
-    PRIMARY KEY (DIM_Tiempo_id, DIM_Sede_id, DIM_REP_id, DIM_Bloque_sat_id),
-    FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id),
-    FOREIGN KEY (DIM_Sede_id) REFERENCES KEY_GROUP.BI_DIM_Sede(DIM_Sede_id),
-    FOREIGN KEY (DIM_REP_id) REFERENCES KEY_GROUP.BI_DIM_Rango_etario_profesor(DIM_REP_id),
-    FOREIGN KEY (DIM_Bloque_sat_id) REFERENCES KEY_GROUP.BI_DIM_Bloques_de_satisfaccion(DIM_Bloque_sat_id)
-);
+
+SELECT DIM_Tiempo_id, DIM_Sede_id, DIM_REP_id,  DIM_Bloque_sat_id
+INTO KEY_GROUP.BI_HECHO_Encuestas
+FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
+      UNION 
+      SELECT * FROM KEY_GROUP.BI_DIM_Sede
+      UNION
+      SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_profesor
+      UNION
+      SELECT * FROM KEY_GROUP.BI_DIM_Bloques_de_satisfaccion) AS Encuestas
+GROUP BY DIM_Tiempo_id, DIM_Sede_id, DIM_REP_id,  DIM_Bloque_sat_id
+
+ALTER TABLE KEY_GROUP.BI_HECHO_Encuestas
+      ADD indice_sat_anual DECIMAL(38,2)
+;
 GO
 
 -- VOLCADO ESQUEMA-BI DIMENSIONES
