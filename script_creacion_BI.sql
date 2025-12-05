@@ -76,6 +76,69 @@ CREATE TABLE KEY_GROUP.BI_DIM_Factura (
     Estado_factura NVARCHAR(255)
 );
 
+-- VOLCADO ESQUEMA-BI DIMENSIONES
+
+IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo)
+INSERT INTO KEY_GROUP.BI_DIM_Tiempo
+
+SELECT anio, (CASE WHEN mes BETWEEN 1 AND 6 THEN 1 WHEN BETWEEN 7 AND 12 THEN 2) AS Semestre, generate_series(1,12) AS mes
+FROM generate_series(1961,2100) AS anio
+;
+
+IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Sede)
+INSERT INTO KEY_GROUP.BI_DIM_Sede
+
+SELECT nombre
+FROM KEY_GROUP.Sede
+ORDER BY id_sede
+;
+
+IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_alumno)
+INSERT INTO KEY_GROUP.BI_DIM_Rango_etario_alumno
+
+VALUES ('menor de 25', 0, 25),('de 25 a 35', 25, 35),('de 35 a 50', 35, 50),('mayor de 50', 50, 120)
+;
+
+IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_profesor)
+INSERT INTO KEY_GROUP.BI_DIM_Rango_etario_profesor
+
+VALUES ('menor de 25', 0, 25),('de 25 a 35', 25, 35),('de 35 a 50', 35, 50),('mayor de 50', 50, 120)
+;
+
+IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Turno_curso)
+INSERT INTO KEY_GROUP.BI_DIM_Turno_curso
+
+VALUES ('mañana'),('tarde'),('noche')
+;
+
+IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Categoria_curso)
+INSERT INTO KEY_GROUP.BI_DIM_Categoria_curso
+
+SELECT descripcion
+FROM KEY_GROUP.Sede
+ORDER BY id_categoria
+;
+
+IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Medio_de_pago)
+INSERT INTO KEY_GROUP.BI_DIM_Medio_de_pago
+
+SELECT codigo_medio_de_pago
+FROM KEY_GROUP.Medio_de_Pago
+ORDER BY codigo_medio_de_pago
+;
+
+IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Bloques_de_satisfaccion)
+INSERT INTO KEY_GROUP.BI_DIM_Bloques_de_satisfaccion
+
+VALUES ('satisfecho',7,10),('neutral',5,6),('insatisfecho',1,4)
+;
+
+IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Factura)
+INSERT INTO KEY_GROUP.BI_DIM_Factura
+
+VALUES ('pendiente'),('pagado'),('atrasado')
+;
+
 
 --HECHOS + VOLCADO DE DATOS
 
@@ -182,70 +245,6 @@ ALTER TABLE KEY_GROUP.BI_HECHO_Encuestas
       ADD indice_sat_anual DECIMAL(38,2)
 ;
 GO
-
--- VOLCADO ESQUEMA-BI DIMENSIONES
-
-IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo)
-INSERT INTO KEY_GROUP.BI_DIM_Tiempo
-
-SELECT anio, (CASE WHEN mes BETWEEN 1 AND 6 THEN 1 WHEN BETWEEN 7 AND 12 THEN 2) AS Semestre, generate_series(1,12) AS mes
-FROM generate_series(1961,2100) AS anio
-;
-
-IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Sede)
-INSERT INTO KEY_GROUP.BI_DIM_Sede
-
-SELECT nombre
-FROM KEY_GROUP.Sede
-ORDER BY id_sede
-;
-
-IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_alumno)
-INSERT INTO KEY_GROUP.BI_DIM_Rango_etario_alumno
-
-VALUES ('menor de 25', 0, 25),('de 25 a 35', 25, 35),('de 35 a 50', 35, 50),('mayor de 50', 50, 120)
-;
-
-IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_profesor)
-INSERT INTO KEY_GROUP.BI_DIM_Rango_etario_profesor
-
-VALUES ('menor de 25', 0, 25),('de 25 a 35', 25, 35),('de 35 a 50', 35, 50),('mayor de 50', 50, 120)
-;
-
-IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Turno_curso)
-INSERT INTO KEY_GROUP.BI_DIM_Turno_curso
-
-VALUES ('mañana'),('tarde'),('noche')
-;
-
-IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Categoria_curso)
-INSERT INTO KEY_GROUP.BI_DIM_Categoria_curso
-
-SELECT descripcion
-FROM KEY_GROUP.Sede
-ORDER BY id_categoria
-;
-
-IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Medio_de_pago)
-INSERT INTO KEY_GROUP.BI_DIM_Medio_de_pago
-
-SELECT codigo_medio_de_pago
-FROM KEY_GROUP.Medio_de_Pago
-ORDER BY codigo_medio_de_pago
-;
-
-IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Bloques_de_satisfaccion)
-INSERT INTO KEY_GROUP.BI_DIM_Bloques_de_satisfaccion
-
-VALUES ('satisfecho',7,10),('neutral',5,6),('insatisfecho',1,4)
-;
-
-IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Factura)
-INSERT INTO KEY_GROUP.BI_DIM_Factura
-
-VALUES ('pendiente'),('pagado'),('atrasado')
-;
-
 
 
 --VIEWS
