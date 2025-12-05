@@ -183,7 +183,7 @@ FROM KEY_GROUP.BI_DIM_Tiempo
      CROSS JOIN KEY_GROUP.BI_DIM_Sede
 GROUP BY DIM_Tiempo_id, DIM_Sede_id
 
-ALTER TABLE KEY_GROUP.BI_HECHO_Evaluaciones  
+ALTER TABLE KEY_GROUP.BI_HECHO_Inscripciones_a_finales
       ADD cantidad_inscriptos INT
 ;
 
@@ -213,7 +213,7 @@ FROM KEY_GROUP.BI_DIM_Tiempo
      CROSS JOIN KEY_GROUP.BI_DIM_Factura
 GROUP BY DIM_Tiempo_id, DIM_Medio_de_pago_id, DIM_Factura_id
 
-ALTER TABLE KEY_GROUP.BI_HECHO_Ev_finales 
+ALTER TABLE  KEY_GROUP.BI_HECHO_Pagos
       ADD  pct_fuera_de_termino DECIMAL(38,2),
            cantidad_importes_adeudados INT
 ;
