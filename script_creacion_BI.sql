@@ -346,7 +346,7 @@ AS SELECT T.Sede,
                 t.Semestre AS       [Semestre],
                 t.Anio AS           [Anio],
                 COUNT(*) AS         [Total],
-                SUM(CAST(ef.presente AS INT) AS [Presentes]
+                SUM(CAST(ef.presente AS INT)) AS [Presentes]
             FROM KEY_GROUP.Evaluacion_Final) ef
             JOIN KEY_GROUP.Final f ON ef.id_final = f.id_final
             JOIN KEY_GROUP.Curso cr ON f.codigo_curso = cr.codigo_curso
