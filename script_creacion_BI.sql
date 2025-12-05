@@ -77,40 +77,43 @@ CREATE TABLE KEY_GROUP.BI_DIM_Factura (
 );
 
 
---HECHOS
+--HECHOS + VOLCADO DE DATOS
 
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_HECHO_Inscripciones_a_cursos')
-CREATE TABLE KEY_GROUP.BI_HECHO_Inscripciones_a_cursos (
-    DIM_Tiempo_id INT,
-    DIM_Sede_id INT,
-    DIM_Turno_curso_id INT,
-    DIM_Categoria_curso_id INT,
-    inscripciones_totales BIGINT,
-    cantidad_inscripciones_aceptadas BIGINT,
-    pct_inscripciones_rechazadas DECIMAL(38,2),
-    ingresos_recaudados DECIMAL(38,2)
-    
-    PRIMARY KEY (DIM_Tiempo_id, DIM_Sede_id, DIM_Turno_curso_id, DIM_Categoria_curso_id),
-    FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id),
-    FOREIGN KEY (DIM_Sede_id) REFERENCES KEY_GROUP.BI_DIM_Sede(DIM_Sede_id),
-    FOREIGN KEY (DIM_Turno_curso_id) REFERENCES KEY_GROUP.BI_DIM_Turno_curso(DIM_Turno_curso_id),
-    FOREIGN KEY (DIM_Categoria_curso_id) REFERENCES KEY_GROUP.BI_DIM_Categoria_curso(DIM_Categoria_curso_id)
 
-);
+SELECT DIM_Tiempo_id, DIM_Sede_id, DIM_Turno_curso_id, DIM_Categoria_curso_id
+INTO KEY_GROUP.BI_HECHO_Inscripciones_a_cursos
+FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo 
+      UNION 
+      SELECT * FROM KEY_GROUP.BI_DIM_Sede 
+      UNION 
+      SELECT * FROM KEY_GROUP.BI_DIM_Turno_curso
+      UNION 
+      SELECT * FROM KEY_GROUP.BI_DIM_Categoria_curso) AS InscripcionesCursos
+GROUP BY DIM_Tiempo_id, DIM_Sede_id, DIM_Turno_curso_id, DIM_Categoria_curso_id
+
+  
+ALTER TABLE KEY_GROUP.BI_HECHO_Inscripciones_a_cursos
+      ADD inscripciones_totales BIGINT,
+      cantidad_inscripciones_aceptadas BIGINT,
+      pct_inscripciones_rechazadas DECIMAL(38,2),
+      ingresos_recaudados DECIMAL(38,2)
+;
 
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_HECHO_Evaluaciones')
-CREATE TABLE KEY_GROUP.BI_HECHO_Evaluaciones (
-    DIM_Tiempo_id INT,
-    DIM_Sede_id INT,
-    pct_aprobacion_cursada DECIMAL(38,2),
-    
-    PRIMARY KEY (DIM_Tiempo_id, DIM_Sede_id),
-    FOREIGN KEY (DIM_Tiempo_id) REFERENCES KEY_GROUP.BI_DIM_Tiempo(DIM_Tiempo_id),
-    FOREIGN KEY (DIM_Sede_id) REFERENCES KEY_GROUP.BI_DIM_Sede(DIM_Sede_id)
 
-);
+SELECT DIM_Tiempo_id, DIM_Sede_id
+INTO KEY_GROUP.BI_HECHO_Evaluaciones
+FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
+      UNION 
+      SELECT * FROM KEY_GROUP.BI_DIM_Sede) AS Evaluaciones
+GROUP BY DIM_Tiempo_id, DIM_Sede_id
+
+ALTER KEY_GROUP.BI_HECHO_Evaluaciones  
+      ADD pct_aprobacion_cursada DECIMAL(38,2)
+;
 
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY_GROUP' AND TABLE_NAME = 'BI_HECHO_Inscripciones_a_finales')
