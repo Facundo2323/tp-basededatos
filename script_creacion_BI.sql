@@ -147,13 +147,10 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY
 
 SELECT DIM_Tiempo_id, DIM_Sede_id, DIM_Turno_curso_id, DIM_Categoria_curso_id
 INTO KEY_GROUP.BI_HECHO_Inscripciones_a_cursos
-FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo 
-      UNION 
-      SELECT * FROM KEY_GROUP.BI_DIM_Sede 
-      UNION 
-      SELECT * FROM KEY_GROUP.BI_DIM_Turno_curso
-      UNION 
-      SELECT * FROM KEY_GROUP.BI_DIM_Categoria_curso) AS InscripcionesCursos
+FROM KEY_GROUP.BI_DIM_Tiempo 
+     CROSS JOIN KEY_GROUP.BI_DIM_Sede 
+     CROSS JOIN KEY_GROUP.BI_DIM_Turno_curso
+     CROSS JOIN KEY_GROUP.BI_DIM_Categoria_curso
 GROUP BY DIM_Tiempo_id, DIM_Sede_id, DIM_Turno_curso_id, DIM_Categoria_curso_id
 
   
@@ -169,9 +166,8 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY
 
 SELECT DIM_Tiempo_id, DIM_Sede_id
 INTO KEY_GROUP.BI_HECHO_Evaluaciones
-FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
-      UNION 
-      SELECT * FROM KEY_GROUP.BI_DIM_Sede) AS Evaluaciones
+FROM KEY_GROUP.BI_DIM_Tiempo
+     CROSS JOIN KEY_GROUP.BI_DIM_Sede
 GROUP BY DIM_Tiempo_id, DIM_Sede_id
 
 ALTER TABLE KEY_GROUP.BI_HECHO_Evaluaciones  
@@ -183,9 +179,8 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY
 
 SELECT DIM_Tiempo_id, DIM_Sede_id
 INTO KEY_GROUP.BI_HECHO_Inscripciones_a_finales
-FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
-      UNION 
-      SELECT * FROM KEY_GROUP.BI_DIM_Sede) AS InscripcionesFinales
+FROM KEY_GROUP.BI_DIM_Tiempo
+     CROSS JOIN KEY_GROUP.BI_DIM_Sede
 GROUP BY DIM_Tiempo_id, DIM_Sede_id
 
 ALTER TABLE KEY_GROUP.BI_HECHO_Evaluaciones  
@@ -197,13 +192,10 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY
 
 SELECT DIM_Tiempo_id, DIM_Sede_id, DIM_REA_id,  DIM_Categoria_curso_id
 INTO KEY_GROUP.BI_HECHO_Ev_finales
-FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
-      UNION 
-      SELECT * FROM KEY_GROUP.BI_DIM_Sede
-      UNION
-      SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_alumno
-      UNION
-      SELECT * FROM KEY_GROUP.BI_DIM_Categoria_curso) AS EvaluacionesFinales
+FROM KEY_GROUP.BI_DIM_Tiempo 
+     CROSS JOIN KEY_GROUP.BI_DIM_Sede
+     CROSS JOIN KEY_GROUP.BI_DIM_Rango_etario_alumno
+     CROSS JOIN KEY_GROUP.BI_DIM_Categoria_curso
 GROUP BY DIM_Tiempo_id, DIM_Sede_id, DIM_REA_id,  DIM_Categoria_curso_id
 
 ALTER TABLE KEY_GROUP.BI_HECHO_Ev_finales 
@@ -216,11 +208,9 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY
 
 SELECT DIM_Tiempo_id, DIM_Medio_de_pago_id, DIM_Factura_id
 INTO KEY_GROUP.BI_HECHO_Pagos
-FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
-      UNION 
-      SELECT * FROM KEY_GROUP.BI_DIM_Medio_de_pago
-      UNION
-      SELECT * FROM KEY_GROUP.BI_DIM_Factura) AS Pagos
+FROM KEY_GROUP.BI_DIM_Tiempo
+     CROSS JOIN KEY_GROUP.BI_DIM_Medio_de_pago
+     CROSS JOIN KEY_GROUP.BI_DIM_Factura
 GROUP BY DIM_Tiempo_id, DIM_Medio_de_pago_id, DIM_Factura_id
 
 ALTER TABLE KEY_GROUP.BI_HECHO_Ev_finales 
@@ -232,13 +222,10 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'KEY
 
 SELECT DIM_Tiempo_id, DIM_Sede_id, DIM_REP_id,  DIM_Bloque_sat_id
 INTO KEY_GROUP.BI_HECHO_Encuestas
-FROM (SELECT * FROM KEY_GROUP.BI_DIM_Tiempo
-      UNION 
-      SELECT * FROM KEY_GROUP.BI_DIM_Sede
-      UNION
-      SELECT * FROM KEY_GROUP.BI_DIM_Rango_etario_profesor
-      UNION
-      SELECT * FROM KEY_GROUP.BI_DIM_Bloques_de_satisfaccion) AS Encuestas
+FROM KEY_GROUP.BI_DIM_Tiempo
+     CROSS JOIN KEY_GROUP.BI_DIM_Sede
+     CROSS JOIN KEY_GROUP.BI_DIM_Rango_etario_profesor
+     CROSS JOIN KEY_GROUP.BI_DIM_Bloques_de_satisfaccion
 GROUP BY DIM_Tiempo_id, DIM_Sede_id, DIM_REP_id,  DIM_Bloque_sat_id
 
 ALTER TABLE KEY_GROUP.BI_HECHO_Encuestas
