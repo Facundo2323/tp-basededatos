@@ -353,7 +353,7 @@ AS SELECT T.Sede,
             JOIN KEY_GROUP.Sedes_por_Curso sc ON sc.codigo_curso = cr.codigo_curso
             JOIN KEY_GROUP.Sede s ON sc.id_sede = s.id_sede
             JOIN KEY_GROUP.BI_DIM_Tiempo t ON MONTH(f.fecha_final) = t.Mes AND YEAR(f.fecha_final) = t.Anio
-            GROUP BY s.nombre, t.Semestre, t.Anio
+            GROUP BY s.nombre, t.Semestre, t.Anio) AS T
 GO
 --7 Desvío de pagos:
 CREATE VIEW Desvio_pagos
@@ -368,7 +368,7 @@ AS SELECT T.Semestre,
                 FROM KEY_GROUP.Pago p
                 JOIN KEY_GROUP.Factura f ON p.factura_numero = f.factura_numero
                 JOIN KEY_GROUP.BI_DIM_Tiempo t ON MONTH(f.fecha_vencimiento) = t.mes AND YEAR(f.fecha_vencimiento) = t.anio
-                GROUP BY t.Semestre, t.Anio
+                GROUP BY t.Semestre, t.Anio) AS T
 GO
 --8 Tasa de Morosidad Financiera mensual:
 CREATE VIEW Morosidad_financiera_mensual 
@@ -382,7 +382,7 @@ AS SELECT T.Mes,
                     SUM(CASE WHEN p.factura_numero IS NULL THEN f.importe_total ELSE 0 END) AS [Total Adeudado]
                 FROM KEY_GROUP.Factura f
                 LEFT JOIN KEY_GROUP.Pago p ON f.factura_numero = p.factura_numero AND MONTH(f.fecha_vencimiento) = MONTH(p.fecha_pago)
-                GROUP BY MONTH(f.fecha_vencimiento), YEAR(f.fecha_vencimiento)
+                GROUP BY MONTH(f.fecha_vencimiento), YEAR(f.fecha_vencimiento)) AS T
 GO
 --9 Ingresos por categoría de cursos:
 CREATE VIEW ingresos_categoría_cursos 
@@ -420,4 +420,4 @@ AS  SELECT T.[Rango Etario],
                 JOIN KEY_GROUP.Sede s ON sc.id_sede = s.id_sede
                 JOIN KEY_GROUP.Evaluacion e ON cr.codigo_curso = e.codigo_curso
                 JOIN KEY_GROUP.BI_DIM_Bloques_de_satisfaccion bs ON e.nota BETWEEN bs.NotaMinima AND bs.NotaMaxima
-                GROUP BY re.Descripcion, s.nombre, YEAR(cr.fecha_inicio)
+                GROUP BY re.Descripcion, s.nombre, YEAR(cr.fecha_inicio)) AS T
