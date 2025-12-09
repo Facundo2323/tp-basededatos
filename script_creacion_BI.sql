@@ -123,7 +123,7 @@ IF NOT EXISTS (SELECT * FROM KEY_GROUP.BI_DIM_Categoria_curso)
 INSERT INTO KEY_GROUP.BI_DIM_Categoria_curso
 
 SELECT descripcion
-FROM KEY_GROUP.Sede
+FROM KEY_GROUP.Categoria
 ORDER BY id_categoria
 ;
 
